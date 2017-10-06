@@ -9,32 +9,55 @@ talalib.py is a small python module that allows easy interaction with the sensor
 ## Usage
 
 ### UI
-Interacting with the display.
+This class interacts with the screen and keypad.
 
 #### Setup
 
 ```python
-from talalib import ui
+from talalib import UI
 ui = UI()
 ```
 
 #### Menu
 
-Get the user to select from a list of items.
+Get the user to select from a list of items. The first parameter of the function
+is the list of strings to ask the user to select, the output of the function will
+be one of the items in the list as a string.
 
 ```python
 ui.menu(["Item 1", "Item 2", "Item 3"])
 # -> "Item 1"
 ```
 
-Input a list of items to put in the menu. The output will be one of those items.
-
 #### Popup
 
-This shows a message to the user.
+This shows a message to the user. The first parameter of the function is the
+title of the popup as a string and the second parameter is the body of the popup,
+if the body is too long to fit on screen, the user can scroll using the up and
+down keys.
 
 ```python
 ui.popup("Example", "This is an example popup!")
 ```
 
 Input a title then a body.
+
+### Input
+This class interacts with the keypad and collects inputs from it.
+
+#### Setup
+
+```python
+from talalib import Input
+inp = Input()
+```
+
+#### Single Button
+
+This waits for a button on the keypad to be pressed, then returns the button as
+a string (0-9, #, \*).
+
+```python
+inp.singlebutton()
+# -> "1"
+```

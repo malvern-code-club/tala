@@ -9,6 +9,80 @@ from PIL import ImageFont
 
 import textwrap
 
+import RPi.GPIO as GPIO
+
+class Input():
+    def __init__(self):
+        GPIO.setmode(GPIO.BCM)
+
+        GPIO.setup(26, GPIO.OUT) # row 1
+        GPIO.setup(19, GPIO.OUT) # row 2
+        GPIO.setup(13, GPIO.OUT) # row 3
+        GPIO.setup(6, GPIO.OUT) # row 4
+
+        GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # col 1
+        GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # col 2
+        GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # col 3
+
+        GPIO.output(26, GPIO.LOW)
+        GPIO.output(19, GPIO.LOW)
+        GPIO.output(13, GPIO.LOW)
+        GPIO.output(6, GPIO.LOW)
+
+    def singlebutton(self, wait=0.05):
+        key = ""
+
+        while key == "":
+            GPIO.output(26, GPIO.HIGH)
+            GPIO.output(19, GPIO.LOW)
+            GPIO.output(13, GPIO.LOW)
+            GPIO.output(6, GPIO.LOW)
+            if GPIO.input(17):
+                key = "1"
+            if GPIO.input(27):
+                key = "2"
+            if GPIO.input(22):
+                key = "3"
+
+            GPIO.output(26, GPIO.LOW)
+            GPIO.output(19, GPIO.HIGH)
+            GPIO.output(13, GPIO.LOW)
+            GPIO.output(6, GPIO.LOW)
+            if GPIO.input(17):
+                key = "4"
+            if GPIO.input(27):
+                key = "5"
+            if GPIO.input(22):
+                key = "6"
+
+            GPIO.output(26, GPIO.LOW)
+            GPIO.output(19, GPIO.LOW)
+            GPIO.output(13, GPIO.HIGH)
+            GPIO.output(6, GPIO.LOW)
+            if GPIO.input(17):
+                key = "7"
+            if GPIO.input(27):
+                key = "8"
+            if GPIO.input(22):
+                key = "9"
+
+            GPIO.output(26, GPIO.LOW)
+            GPIO.output(19, GPIO.LOW)
+            GPIO.output(13, GPIO.LOW)
+            GPIO.output(6, GPIO.HIGH)
+            if GPIO.input(17):
+                key = "*"
+            if GPIO.input(27):
+                key = "0"
+            if GPIO.input(22):
+                key = "#"
+
+            time.sleep(wait)
+        return key
+
+    def cleanup(self):
+        GPIO.cleanup()
+
 class UI():
     def __init__(self):
         self.display = Adafruit_SSD1306.SSD1306_128_64(rst=24)
