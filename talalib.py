@@ -11,8 +11,20 @@ import textwrap
 
 import RPi.GPIO as GPIO
 
-class Input():
+class Tala():
     def __init__(self):
+        # Setup Display
+        self.display = Adafruit_SSD1306.SSD1306_128_64(rst=24)
+
+        self.display.begin()
+        self.display.clear()
+        self.display.display()
+
+        self.width = self.display.width
+        self.height = self.display.height
+
+
+        # Setup Keypad
         GPIO.setmode(GPIO.BCM)
 
         GPIO.setup(26, GPIO.OUT) # row 1
@@ -83,17 +95,6 @@ class Input():
     def cleanup(self):
         GPIO.cleanup()
 
-class UI():
-    def __init__(self):
-        self.display = Adafruit_SSD1306.SSD1306_128_64(rst=24)
-
-        self.display.begin()
-        self.display.clear()
-        self.display.display()
-
-        self.width = self.display.width
-        self.height = self.display.height
-
     def popup(self, title, body):
         wrapbody = textwrap.wrap(body, width=17)
 
@@ -122,14 +123,14 @@ class UI():
             self.display.image(image)
             self.display.display()
 
-            option = input("> ")
-            if option == "up":
+            btn = self.singlebutton()
+            if btn == "2":
                 if startline > 0:
                     startline = startline - 1
-            elif option == "down":
+            elif btn == "8":
                 if startline < (len(wrapbody)-1):
                     startline = startline + 1
-            elif option == "ok":
+            elif btn == "5":
                 return
             else:
                 print("invalid")
@@ -189,14 +190,18 @@ class UI():
             self.display.image(image)
             self.display.display()
 
-            option = input("> ")
-            if option == "up":
+            btn = self.singlebutton()
+            if btn == "2":
                 if selected > 0:
                     selected = selected - 1
-            elif option == "down":
+            elif btn == "8":
                 if selected < (len(items)-1):
                     selected = selected + 1
-            elif option == "ok":
-                return selected
+            elif btn == "5":
+                return items[selected]
             else:
                 print("invalid")
+
+    def clear(self):
+        self.display.clear()
+        self.display.display()
