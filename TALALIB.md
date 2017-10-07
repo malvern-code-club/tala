@@ -26,15 +26,15 @@ tala.menu(["Item 1", "Item 2", "Item 3"])
 # -> "Item 1"
 ```
 
-### `popup(title[String], body[String])` *[Screen, Keypad]*
+### `message(title[String], body[String])` *[Screen, Keypad]*
 
 This shows a message to the user. The first parameter of the function is the
-title of the popup as a string and the second parameter is the body of the popup,
+title of the message as a string and the second parameter is the body of the message,
 if the body is too long to fit on screen, the user can scroll using the up and
 down keys.
 
 ```python
-tala.popup("Example", "This is an example popup!")
+tala.message("Example", "This is an example popup!")
 ```
 
 Input a title then a body.
@@ -47,6 +47,20 @@ a string (0-9, #, \*).
 ```python
 tala.singlebutton()
 # -> "1"
+```
+
+### `type(wait[Integer]{optional})` *[Screen, Keypad]*
+
+This allows the user to type on the keypad by holding a key to cycle through the
+letters and unpressing to type the letter that is currently on the screen. The
+user can then press the `#` button to enter the text. An *optional* parameter is
+`wait` which is how fast move onto the next letter in the sequence when the button
+is held down in seconds (the default is `0.5`). The function returns the message
+as a string.
+
+```python
+tala.type()
+# -> "Hello World!"
 ```
 
 ### `cleanup()` *[Keypad]*
