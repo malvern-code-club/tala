@@ -7,26 +7,12 @@ tala.clear()
 while True:
     choice = tala.menu(["Public Message", "Private Message", "Snake", "Distress Beacon", "Power Off"])
     if choice == "Public Message":
-        message = []
-        while True:
-            user_input = tala.type()
-            if user_input == "#": #Stop input sequence
-                break
-            else:
-                message.append(user_input)
-        message = "".join(message)
+        message = tala.type()
         tala.message("Debug", message) #Replace this with code for sending message
         
     elif choice == "Private Message":
-        message = []
-        while True:
-            user_input = tala.type()
-            if user_input == "#": #Stop input sequence
-                break
-            else:
-                message.append(user_input)
-        message = "".join(message)
-        tala.message("Debug", message) #Replace this with code for sending message
+         message = tala.type()
+         tala.message("Debug", message) #Replace this with code for sending message
         
     elif choice == "Snake":
         tala.message("Alert", "[game code here]")
