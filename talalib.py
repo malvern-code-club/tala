@@ -104,6 +104,60 @@ class Tala():
             time.sleep(wait)
         return key
 
+    def type_numbers(self, wait=0.5):
+        doloop = True
+        message = ""
+        key = ""
+
+        while doloop == True:
+            GPIO.output(26, GPIO.HIGH)
+            GPIO.output(19, GPIO.LOW)
+            GPIO.output(13, GPIO.LOW)
+            GPIO.output(6, GPIO.LOW)
+            if GPIO.input(17):
+                key = "1"
+            if GPIO.input(27):
+                key = "2"
+            if GPIO.input(22):
+                key = "3"
+
+            GPIO.output(26, GPIO.LOW)
+            GPIO.output(19, GPIO.HIGH)
+            GPIO.output(13, GPIO.LOW)
+            GPIO.output(6, GPIO.LOW)
+            if GPIO.input(17):
+                key = "4"
+            if GPIO.input(27):
+                key = "5"
+            if GPIO.input(22):
+                key = "6"
+
+            GPIO.output(26, GPIO.LOW)
+            GPIO.output(19, GPIO.LOW)
+            GPIO.output(13, GPIO.HIGH)
+            GPIO.output(6, GPIO.LOW)
+            if GPIO.input(17):
+                key = "7"
+            if GPIO.input(27):
+                key = "8"
+            if GPIO.input(22):
+                key = "9"
+
+            GPIO.output(26, GPIO.LOW)
+            GPIO.output(19, GPIO.LOW)
+            GPIO.output(13, GPIO.LOW)
+            GPIO.output(6, GPIO.HIGH)
+            if GPIO.input(17):
+                key = "*"
+            if GPIO.input(27):
+                key = "0"
+            if GPIO.input(22):
+                doloop = False
+                key = ""
+            message = message + key
+            time.sleep(wait)
+        return message
+
     def type(self, wait=0.5):
         # Make a new image/canvas with the width and height of the screen.
         image = Image.new("1", (self.width, self.height))
@@ -270,7 +324,7 @@ class Tala():
 
         # define the fonts
         titlefont = ImageFont.truetype("leco1976.ttf", 15)
-        font = ImageFont.truetype("FreePixel.ttf", 14)
+        font = ImageFont.truetype("FreePixel.ttf", 11)
 
         startline = 0
 
