@@ -104,7 +104,7 @@ class UI():
                
             
         def draw_rectangle(self, draw, x, y, h, o, f1, f2, s):
-            draw.rectangle((x, y, self.width, h), outline=o, fill=f1)            
+            draw.rectangle((x, y, self.width, h), outline=o, fill=f1)
             tw, th = draw.textsize(items[selected+s], font=font)                
             padding = (32-th)/2                
             draw.text((x+padding, y+padding), items[selected+s], font=font, fill=f2)
