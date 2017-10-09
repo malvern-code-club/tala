@@ -1,5 +1,7 @@
 import time
 
+import serial
+
 import Adafruit_GPIO.SPI as SPI
 import Adafruit_SSD1306
 
@@ -23,19 +25,25 @@ class Tala():
         self.width = self.display.width
         self.height = self.display.height
 
+        # Setup Radio
+        self.radio = serial.Serial("/dev/serial0", baudrate=9600, timeout=1)
 
         # Setup Keypad
         GPIO.setmode(GPIO.BCM)
 
+        # Tell the Raspberry Pi that each row on the keypad is an output
         GPIO.setup(26, GPIO.OUT) # row 1
         GPIO.setup(19, GPIO.OUT) # row 2
         GPIO.setup(13, GPIO.OUT) # row 3
         GPIO.setup(6, GPIO.OUT) # row 4
 
+        # Tell the Raspberry Pi that each column on the keypad is an input and
+        # should have an (internal) pull down resistor.
         GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # col 1
         GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # col 2
         GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # col 3
 
+        # Turn keypad rows off.
         GPIO.output(26, GPIO.LOW)
         GPIO.output(19, GPIO.LOW)
         GPIO.output(13, GPIO.LOW)
@@ -44,11 +52,15 @@ class Tala():
     def singlebutton(self, wait=0.05):
         key = ""
 
+        # Loop while we haven't got a key
         while key == "":
+            # Turn on row 1 but turn off every other row
             GPIO.output(26, GPIO.HIGH)
             GPIO.output(19, GPIO.LOW)
             GPIO.output(13, GPIO.LOW)
             GPIO.output(6, GPIO.LOW)
+            # If the first column is turned on we know that the first
+            # button has been pressed and so on.
             if GPIO.input(17):
                 key = "1"
             if GPIO.input(27):
@@ -93,12 +105,19 @@ class Tala():
         return key
 
     def type(self, wait=0.5):
+        # Make a new image/canvas with the width and height of the screen.
         image = Image.new("1", (self.width, self.height))
+        # Make a new draw variable which draws shapes/text to the screen.
         draw = ImageDraw.Draw(image)
 
+        # Define the fonts
         bigfont = ImageFont.truetype("leco1976.ttf", 45)
         font = ImageFont.truetype("FreePixel.ttf", 14)
 
+        # Define the characters to cycle for each key on the keypad
+        # Special:
+        #   _ = Space
+        #   <- = Backspace
         keypadkeys = {
             "2": ["a", "b", "c"],
             "3": ["d", "e", "f"],
@@ -168,21 +187,32 @@ class Tala():
                 doloop = False
 
             if key != "":
+                # If the key is the same as the key before (aka the button is
+                # being held down.)
                 if key == keybefore:
-                    # hold
+                    # Get the current index of the letter
                     index = keypadkeys[key].index(currentletter)
+                    # Check if adding 1 to the key will make it go off the list
                     if (index+1) < len(keypadkeys[key]):
+                        # Nope, add 1 to the key
                         currentletter = keypadkeys[key][index+1]
                     else:
+                        # Yep, set the list to 0
                         currentletter = keypadkeys[key][0]
                 else:
+                    # Key has not being held, so set the current letter to the
+                    # first on the list of the button.
                     currentletter = keypadkeys[key][0]
 
+                # Clear the canvas by drawing a blank rectangle.
                 draw.rectangle((0, 0, self.width, self.height), outline=0, fill=0)
 
+                # Get the width and height of the letter
                 w, h = draw.textsize(currentletter, font=bigfont)
+                # Draw the letter in the middle of the screen
                 draw.text(((self.width-w)/2, (self.height-h)/2), currentletter, font=bigfont, fill=255)
 
+                # Display the canvas on the screen.
                 self.display.image(image)
                 self.display.display()
 
@@ -190,6 +220,7 @@ class Tala():
                 time.sleep(wait)
             else:
                 if currentletter != "":
+                    # Check for special keys
                     if currentletter != "<-":
                         if currentletter == "_":
                             currentletter = " "
@@ -198,16 +229,24 @@ class Tala():
                         message = message[:-1]
                     currentletter = ""
 
+                # if a key is not pressed show the text being typed
+
+                # clear the canvas by drawing a blank rectangle
                 draw.rectangle((0, 0, self.width, self.height), outline=0, fill=0)
 
+                # make the message wrap (aka if the message goes off the screen
+                # make it start on a new line)
                 messagewrap = textwrap.wrap(message, width=17)
 
+                # get the height of a line
                 linewidth, lineheight = draw.textsize("test", font=font)
                 lines = 0
+                # draw each line
                 for i in range(0, len(messagewrap)):
                     draw.text((5, 5+((lineheight+2)*lines)), messagewrap[i], font=font, fill=255)
                     lines += 1
 
+                # display the canvas to the screen
                 self.display.image(image)
                 self.display.display()
 
@@ -216,43 +255,60 @@ class Tala():
         return message
 
     def cleanup(self):
+        # clean up the raspberry pi's gpio
+        # ie turn off pins, etc..
         GPIO.cleanup()
 
     def message(self, title, body):
+        # make the message wrap (aka if it goes off the screen make it start on
+        # a new line)
         wrapbody = textwrap.wrap(body, width=17)
 
+        # make a new image
         image = Image.new("1", (self.width, self.height))
         draw = ImageDraw.Draw(image)
 
+        # define the fonts
         titlefont = ImageFont.truetype("leco1976.ttf", 15)
         font = ImageFont.truetype("FreePixel.ttf", 14)
 
         startline = 0
 
         while True:
+            # clear the canvas
             draw.rectangle((0, 0, self.width, self.height), outline=0, fill=0)
 
+            # get width and height of title
             titlewidth, titleheight = draw.textsize(title, font=titlefont)
+            # draw a box to put the title in
             draw.rectangle((0, 0, self.width, titleheight+10), outline=255, fill=255)
             padding = 5
+            # draw the title text
             draw.text((0+padding, 0+padding), title, font=titlefont, fill=0)
 
+            # get line width and height
             linewidth, lineheight = draw.textsize("test", font=font)
             lines = 0
+            # draw each line on the screen
             for i in range(startline, len(wrapbody)):
                 draw.text((0+padding, 0+padding+titleheight+padding+padding+((lineheight+2)*lines)), wrapbody[i], font=font, fill=255)
                 lines += 1
 
+            # draw the canvas to the screen
             self.display.image(image)
             self.display.display()
 
+            # check for button presses
             btn = self.singlebutton()
+            # if button 2 is pressed scroll up
             if btn == "2":
                 if startline > 0:
                     startline = startline - 1
+            # if button 8 is pressed scroll down
             elif btn == "8":
                 if startline < (len(wrapbody)-1):
                     startline = startline + 1
+            # if button 5 is pressed dismiss the message
             elif btn == "5":
                 return
 
@@ -260,22 +316,30 @@ class Tala():
         if len(items) < 2:
             raise ValueError("Items list given must contain 2 or more items!")
 
+        # make a canvas
         image = Image.new("1", (self.width, self.height))
         draw = ImageDraw.Draw(image)
 
+        # clear the canvas
         draw.rectangle((0, 0, self.width, self.height), outline=0, fill=0)
 
+        # define font
         font = ImageFont.truetype("leco1976.ttf", 15)
 
         selected = 0
 
         while True:
+            # clear the screen
             draw.rectangle((0, 0, self.width, self.height), outline=0, fill=0)
 
+            # if the first item is selected
             if selected == 0:
+                # draw a filled box the width of the screen and half the screen high
                 draw.rectangle((0, 0, self.width, 32), outline=255, fill=255)
+                # get the width and height of the text
                 tw, th = draw.textsize(items[selected], font=font)
                 padding = (32-th)/2
+                # draw the text on top of the rectangle
                 draw.text((0+padding, 0+padding), items[selected], font=font, fill=0)
 
                 draw.rectangle((0, 32, self.width, 64), outline=0, fill=0)
@@ -324,3 +388,19 @@ class Tala():
     def clear(self):
         self.display.clear()
         self.display.display()
+
+    def send(self, message):
+        message = message.encode()
+        self.radio.write(message)
+
+    def waitForReceive(self):
+        while True:
+            response = self.radio.readline().decode("utf-8")
+            if not response == "":
+                return response
+
+    def receive(self):
+        return self.radio.readline().decode("utf-8")
+
+    def closeRadio(self):
+        self.radio.close()
