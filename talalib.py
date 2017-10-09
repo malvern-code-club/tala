@@ -77,15 +77,15 @@ class UI():
             draw.rectangle((0, 0, self.width, self.height), outline=0, fill=0)
 
             if selected == 0:
-                draw_rectangle(0, 0, 32, 255, 255, 0, 0)
-                draw_rectangle(0, 48, 80, 0, 0, 255, 1)                
-                draw_rectangle(0, 32, 64, 0, 0, 255, 1)
+                draw_rectangle(draw, 0, 0, 32, 255, 255, 0, 0)
+                draw_rectangle(draw, 0, 48, 80, 0, 0, 255, 1)                
+                draw_rectangle(draw, 0, 32, 64, 0, 0, 255, 1)
             elif selected == (len(items)-1):
-                draw_rectangle(0, 0, 32, 0, 0, 255, -1)
-                draw_rectangle(0, 32, 64, 255, 255, 0, 0)
+                draw_rectangle(draw, 0, 0, 32, 0, 0, 255, -1)
+                draw_rectangle(draw, 0, 32, 64, 255, 255, 0, 0)
             else:
-                draw_rectangle(0, -16, 16, 0, 0, 255, -1)
-                draw_rectangle(0, 16, 48, 255, 255, 0, 0)       
+                draw_rectangle(draw, 0, -16, 16, 0, 0, 255, -1)
+                draw_rectangle(draw, 0, 16, 48, 255, 255, 0, 0)       
 
             self.display.image(image)
             self.display.display()
@@ -103,7 +103,7 @@ class UI():
                 print("invalid")
                
             
-        def draw_rectangle(self, x, y, h, o, f1, f2, s):
+        def draw_rectangle(self, draw, x, y, h, o, f1, f2, s):
             draw.rectangle((x, y, self.width, h), outline=o, fill=f1)                
             tw, th = draw.textsize(items[selected+s], font=font)                
             padding = (32-th)/2                
