@@ -37,7 +37,7 @@ down keys.
 tala.message("Example", "This is an example popup!")
 ```
 
-Input a title then a body.
+Input a title, then a body.
 
 ### `singlebutton()` *[Keypad]*
 
