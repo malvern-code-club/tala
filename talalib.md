@@ -3,7 +3,7 @@ talalib.py is a small python module that allows easy interaction with the sensor
 
 ## Supported Modules
 - [x] **Screen** - [OLED SSD1306 (128x64)](http://www.ebay.co.uk/itm/I2C-OLED-Display-128X64-0-96-SSD1306-For-Arduino-Raspberry-Pi-ESP8266-etc-/172736606184)
-- [ ] **Radio Module** - [HC-12 SI4463](http://www.ebay.co.uk/itm/433Mhz-HC-12-SI4463-Wireless-Serial-Port-Module-1000m-Replace-Bluetooth-TE296-/281772656589)
+- [x] **Radio Module** - [HC-12 SI4463](http://www.ebay.co.uk/itm/433Mhz-HC-12-SI4463-Wireless-Serial-Port-Module-1000m-Replace-Bluetooth-TE296-/281772656589)
 - [x] **Keypad** - [4x3 Keypad](http://www.ebay.co.uk/itm/12-4x3-key-Switch-Membrane-Matrix-KeyPad-Self-Adhesive-Arduino-RPI-PIC-AVR-/131708189209)
 
 ## Setup
@@ -60,6 +60,37 @@ as a string.
 
 ```python
 tala.type()
+# -> "Hello World!"
+```
+
+## `send(message[String])` *[Radio]*
+
+This sends a message via the HC-12 module. The first and only parameter is the
+message to send as a string, there is no output.
+
+```python
+tala.send("Hello World!")
+```
+
+## `waitForReceive()` *[Radio]*
+
+This waits for a message to be received via the HC-12 module. There are no
+parameters and the output is the message received as a string.
+
+```python
+tala.waitForReceive()
+# -> "Hello World!"
+```
+
+## `receive()` *[Radio]*
+
+This receives a message from the HC-12 module. There are no parameters and the
+output will be the message as a string. The string may be empty, in which case
+no message has been received. `waitForReceive()` is the output of this command,
+but in a loop.
+
+```python
+tala.receive()
 # -> "Hello World!"
 ```
 

@@ -10,6 +10,9 @@ project. You can read the documentation for this module [here](talalib.md).
 
 ![](tala_bb.png)
 
+***Wiring for modules may not be as they show in this diagram! We bought 2 OLED
+screens and the pinouts on both are different. Be careful!***
+
 ### Screen
 
 | Screen | Raspberry Pi     |
@@ -21,9 +24,6 @@ project. You can read the documentation for this module [here](talalib.md).
 
 ### Keypad
 
-**Keypad wiring will depend on your keypad! Connections may not be the same on
-the wiring diagram as the keypad that you have!**
-
 | Keypad | Raspberry Pi      |
 | ------ | ----------------- |
 | Row 1  | BCM 26 *(Pin 37)* |
@@ -34,15 +34,22 @@ the wiring diagram as the keypad that you have!**
 | Col 2  | BCM 27 *(Pin 13)* |
 | Col 3  | BCM 22 *(Pin 15)* |
 
-## Installation
+### HC-12 Module
 
-**Installing the Adafruit SSD1306 Module**
+| HC-12 | Raspberry Pi      |
+| ----- | ----------------- |
+| VCC   | 3v3 *(Pin 17)*    |
+| GND   | Ground *(Pin 9)*  |
+| RXD   | BCM 14 *(Pin 8)*  |
+| TXD   | BCM 15 *(Pin 10)* |
+
+## Installation
 
 ```
 sudo apt update
 sudo apt install build-essential python3-dev python3-pip
 
-sudo apt install python3-pil python3-smbus git
+sudo apt install python3-pil python3-smbus python3-serial git
 
 git clone https://github.com/adafruit/Adafruit_Python_SSD1306.git
 cd Adafruit_Python_SSD1306
