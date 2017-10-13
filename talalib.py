@@ -326,7 +326,7 @@ class Tala():
         titlefont = ImageFont.truetype("leco1976.ttf", 15)
         font = ImageFont.truetype("FreePixel.ttf", 11)
 
-        startline = 0
+        startline = 0                
 
         while True:
             # clear the canvas
@@ -388,43 +388,15 @@ class Tala():
 
             # if the first item is selected
             if selected == 0:
-                # draw a filled box the width of the screen and half the screen high
-                draw.rectangle((0, 0, self.width, 32), outline=255, fill=255)
-                # get the width and height of the text
-                tw, th = draw.textsize(items[selected], font=font)
-                padding = (32-th)/2
-                # draw the text on top of the rectangle
-                draw.text((0+padding, 0+padding), items[selected], font=font, fill=0)
-
-                draw.rectangle((0, 32, self.width, 64), outline=0, fill=0)
-                tw, th = draw.textsize(items[selected+1], font=font)
-                padding = (32-th)/2
-                draw.text((0+padding, 32+padding), items[selected+1], font=font, fill=255)
+                draw_rectangle(draw, 0, 0, 32, 255, 255, 0, 0)
+                draw_rectangle(draw, 0, 48, 80, 0, 0, 255, 1)                
+                draw_rectangle(draw, 0, 32, 64, 0, 0, 255, 1)
             elif selected == (len(items)-1):
-                draw.rectangle((0, 0, self.width, 32), outline=0, fill=0)
-                tw, th = draw.textsize(items[selected-1], font=font)
-                padding = (32-th)/2
-                draw.text((0+padding, 0+padding), items[selected-1], font=font, fill=255)
-
-                draw.rectangle((0, 32, self.width, 64), outline=255, fill=255)
-                tw, th = draw.textsize(items[selected], font=font)
-                padding = (32-th)/2
-                draw.text((0+padding, 32+padding), items[selected], font=font, fill=0)
+                draw_rectangle(draw, 0, 0, 32, 0, 0, 255, -1)
+                draw_rectangle(draw, 0, 32, 64, 255, 255, 0, 0)
             else:
-                draw.rectangle((0, -16, self.width, 16), outline=0, fill=0)
-                tw, th = draw.textsize(items[selected-1], font=font)
-                padding = (32-th)/2
-                draw.text((0+padding, -16+padding), items[selected-1], font=font, fill=1)
-
-                draw.rectangle((0, 16, self.width, 48), outline=1, fill=1)
-                tw, th = draw.textsize(items[selected], font=font)
-                padding = (32-th)/2
-                draw.text((0+padding, 16+padding), items[selected], font=font, fill=0)
-
-                draw.rectangle((0, 48, self.width, 80), outline=0, fill=0)
-                tw, th = draw.textsize(items[selected+1], font=font)
-                padding = (32-th)/2
-                draw.text((0+padding, 48+padding), items[selected+1], font=font, fill=1)
+                draw_rectangle(draw, 0, -16, 16, 0, 0, 255, -1)
+                draw_rectangle(draw, 0, 16, 48, 255, 255, 0, 0)       
 
             self.display.image(image)
             self.display.display()
@@ -436,8 +408,15 @@ class Tala():
             elif btn == "8":
                 if selected < (len(items)-1):
                     selected = selected + 1
-            elif btn == "5":
+            elif option == "5":
                 return items[selected]
+            
+            
+    def draw_rectangle(self, draw, x, y, h, o, f1, f2, s):
+            draw.rectangle((x, y, self.width, h), outline=o, fill=f1)
+            tw, th = draw.textsize(items[selected+s], font=font) 
+            padding = (32-th)/2 
+            draw.text((x+padding, y+padding), items[selected+s], font=font, fill=f2)
 
     def clear(self):
         self.display.clear()

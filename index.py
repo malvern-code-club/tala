@@ -59,17 +59,16 @@ while True:
         while i != 5:
             msg_id += random.choice(string.ascii_lowercase)
     
-        timestamp = datetime.datetime.now()        
-                
+        timestamp = datetime.datetime.now()
+        
         message = { "content": content,
                     "id": msg_id, 
                     "timestamp": timestamp, 
                     "sender": "", 
                     "recipient": ""
                     }
-            
+        
         tala.send(encode(message))
-	    
     elif choice == "Private Message":
          message = tala.type()
          tala.message("Debug", message) #Replace this with code for sending message
