@@ -216,7 +216,10 @@ class Tala():
             if GPIO.input(22):
                 key = "9"
 
-            self.keypad_row(4)
+            GPIO.output(26, GPIO.LOW)
+            GPIO.output(19, GPIO.LOW)
+            GPIO.output(13, GPIO.LOW)
+            GPIO.output(6, GPIO.HIGH)
             if GPIO.input(17):
                 key = "*"
             if GPIO.input(27):
