@@ -8,7 +8,7 @@ while True:
     choice = tala.menu(["Public Message", "Private Message", "Snake", "Distress Beacon", "Settings", "Power Off"])
     if choice == "Public Message":
         message = tala.type()
-        tala.message("Debug", message) #Replace this with code for sending message
+        tala.send(message)
         
     elif choice == "Private Message":
          message = tala.type()
