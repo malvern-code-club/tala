@@ -1,4 +1,5 @@
 import talalib
+from subprocess import call
 
 tala = talalib.Tala()
 
@@ -38,6 +39,9 @@ while True:
             elif choice == "Exit Options":
                 break
     elif choice == "Power Off":
-        tala.message("Alert", "Power Off")]
-        tala.cleanup()
-        break
+        choice = tala.menu(["Power Off", "Don't Power Off"])
+        if choice == "Power Off":
+            tala.message("Alert", "Power Off")]
+            tala.cleanup()
+            call(["sudo", "halt"])
+            break
