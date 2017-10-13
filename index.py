@@ -1,6 +1,10 @@
 import talalib
 import sqlite3
 import threading
+import random
+import string
+import datetime
+import json
 
 conn = sqlite3.connect("student_database.db")
 c = conn.cursor()
@@ -31,6 +35,14 @@ tala = talalib.Tala()
 
 tala.clear()
 
+def encode(data):
+    data = json.dumps(data) #Json dump message
+    return(data) 
+def decode(data):
+    data = json.loads(data) #Load from json
+    return(data)
+
+
 while True:
     choice = tala.menu(["Public Message", "Private Message", "Snake", "Memo", "Settings", "Power Off"])
     if choice == "Public Message":
@@ -39,6 +51,24 @@ while True:
 
         thread_recv_data = threading.Thread(target=recv_data):
         thread_recv_data.start()
+
+        content = tala.type()
+    
+        msg_id = ""
+        i = 0
+        while i != 5:
+            msg_id += random.choice(string.ascii_lowercase)
+    
+        timestamp = datetime.datetime.now()
+        
+        message = { "content": content,
+                    "id": msg_id, 
+                    "timestamp": timestamp, 
+                    "sender": "", 
+                    "recipient": ""
+                    }
+        
+        tala.send(encode(message))
     elif choice == "Private Message":
          message = tala.type()
          tala.message("Debug", message) #Replace this with code for sending message
