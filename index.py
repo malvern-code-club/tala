@@ -78,7 +78,10 @@ while True:
 	elif choice == "Memo":
 		c.execute("SELECT * FROM memos")
 		memos = c.fetchall()
-		choice = tala.menu(["New Memo"], memos)
+		memolist = ["New Memo"]
+		for memo in memos:
+			memolist.append(memo)
+		choice = tala.menu(memolist)
 		if choice == "New Memo":
 			memo_data = tala.type()
 			tala.message("Alert", "Input memo name")
