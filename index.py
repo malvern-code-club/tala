@@ -94,7 +94,7 @@ while True:
 			conn.commit()
 		else:
 			c.execute("SELECT memo_data FROM memos WHERE memo_name = ?", [choice])
-			memo_data = c.fetchall()
+			memo_data = c.fetchone()
 			tala.message(choice, memo_data[0])
 	elif choice == "Settings":
 		while True:
