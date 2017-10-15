@@ -396,7 +396,7 @@ class Tala():
             elif btn == "8":
                 if selected < (len(items)-1):
                     selected = selected + 1
-            elif option == "5":
+            elif btn == "5":
                 return items[selected]
 
 
