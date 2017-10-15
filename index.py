@@ -91,6 +91,7 @@ while True:
 			tala.message("Alert", "Input memo name")
 			memo_name = tala.type()
 			c.execute("INSERT INTO memos (memo_name, memo_data) values (?, ?)", [memo_name, memo_data])
+			conn.commit()
 		else:
 			c.execute("SELECT memo_data FROM memos WHERE memo_name = ?", [choice])
 			memo_data = c.fetchall()
