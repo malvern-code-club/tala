@@ -79,6 +79,7 @@ while True:
 	elif choice == "Memo":
 		c.execute("SELECT * FROM memos")
 		memos = c.fetchall()
+		print(memos)
 		if len(memos) > 1:
 			memolist = ["New Memo"]
 			for memo in memos:
