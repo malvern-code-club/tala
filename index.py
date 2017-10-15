@@ -30,6 +30,7 @@ for table in tables:
 		print("CREATE TABLE " + table["name"] + " (" + table["columns"] + ")")
 		c.execute("CREATE TABLE " +
 				  table["name"] + " (" + table["columns"] + ")")
+	conn.commit()
 
 
 tala = talalib.Tala()
@@ -78,15 +79,22 @@ while True:
 	elif choice == "Memo":
 		c.execute("SELECT * FROM memos")
 		memos = c.fetchall()
-		choice = tala.menu(["New Memo"], memos)
+		if len(memos) > 0:
+			memolist = ["New Memo"]
+			for memo in memos:
+				memolist.append(memo[0])
+			choice = tala.menu(memolist)
+		else:
+			choice = "New Memo"
 		if choice == "New Memo":
 			memo_data = tala.type()
 			tala.message("Alert", "Input memo name")
 			memo_name = tala.type()
 			c.execute("INSERT INTO memos (memo_name, memo_data) values (?, ?)", [memo_name, memo_data])
+			conn.commit()
 		else:
 			c.execute("SELECT memo_data FROM memos WHERE memo_name = ?", [choice])
-			memo_data = c.fetchall()
+			memo_data = c.fetchone()
 			tala.message(choice, memo_data[0])
 	elif choice == "Settings":
 		while True:
