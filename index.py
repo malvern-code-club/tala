@@ -17,6 +17,7 @@ tables = [
     {
         "name": "config",
         "columns": "pin TEXT"
+    }
 ]
 
 for table in tables:
@@ -37,7 +38,7 @@ tala.clear()
 
 def encode(data):
     data = json.dumps(data) #Json dump message
-    return(data) 
+    return(data)
 def decode(data):
     data = json.loads(data) #Load from json
     return(data)
@@ -53,21 +54,21 @@ while True:
         thread_recv_data.start()
 
         content = tala.type()
-    
+
         msg_id = ""
         i = 0
         while i != 5:
             msg_id += random.choice(string.ascii_lowercase)
-    
+
         timestamp = datetime.datetime.now()
-        
+
         message = { "content": content,
-                    "id": msg_id, 
-                    "timestamp": timestamp, 
-                    "sender": "", 
+                    "id": msg_id,
+                    "timestamp": timestamp,
+                    "sender": "",
                     "recipient": ""
                     }
-        
+
         tala.send(encode(message))
     elif choice == "Private Message":
          message = tala.type()

@@ -2,7 +2,6 @@ import time
 
 import serial
 
-import Adafruit_GPIO.SPI as SPI
 import Adafruit_SSD1306
 
 from PIL import Image
@@ -86,7 +85,7 @@ class Tala():
                 key = "2"
             if GPIO.input(22):
                 key = "3"
-                
+
             self.keypad_row(2)
             if GPIO.input(17):
                 key = "4"
@@ -94,8 +93,8 @@ class Tala():
                 key = "5"
             if GPIO.input(22):
                 key = "6"
-                
-            self.keypad_row(3)            
+
+            self.keypad_row(3)
             if GPIO.input(17):
                 key = "7"
             if GPIO.input(27):
@@ -315,7 +314,7 @@ class Tala():
         titlefont = ImageFont.truetype("leco1976.ttf", 15)
         font = ImageFont.truetype("FreePixel.ttf", 11)
 
-        startline = 0                
+        startline = 0
 
         while True:
             # clear the canvas
@@ -378,14 +377,14 @@ class Tala():
             # if the first item is selected
             if selected == 0:
                 self.draw_rectangle(draw, 0, 0, 32, 255, 255, 0, 0)
-                self.draw_rectangle(draw, 0, 48, 80, 0, 0, 255, 1)                
+                self.draw_rectangle(draw, 0, 48, 80, 0, 0, 255, 1)
                 self.draw_rectangle(draw, 0, 32, 64, 0, 0, 255, 1)
             elif selected == (len(items)-1):
                 self.draw_rectangle(draw, 0, 0, 32, 0, 0, 255, -1)
                 self.draw_rectangle(draw, 0, 32, 64, 255, 255, 0, 0)
             else:
                 self.draw_rectangle(draw, 0, -16, 16, 0, 0, 255, -1)
-                self.draw_rectangle(draw, 0, 16, 48, 255, 255, 0, 0)       
+                self.draw_rectangle(draw, 0, 16, 48, 255, 255, 0, 0)
 
             self.display.image(image)
             self.display.display()
@@ -399,12 +398,12 @@ class Tala():
                     selected = selected + 1
             elif option == "5":
                 return items[selected]
-            
-            
+
+
     def draw_rectangle(self, draw, x, y, h, o, f1, f2, s):
             draw.rectangle((x, y, self.width, h), outline=o, fill=f1)
-            tw, th = draw.textsize(items[selected+s], font=font)                
-            padding = (32-th)/2                
+            tw, th = draw.textsize(items[selected+s], font=font)
+            padding = (32-th)/2
             draw.text((x+padding, y+padding), items[selected+s], font=font, fill=f2)
 
     def clear(self):
