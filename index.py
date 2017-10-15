@@ -79,11 +79,10 @@ while True:
 	elif choice == "Memo":
 		c.execute("SELECT * FROM memos")
 		memos = c.fetchall()
-		print(memos)
-		if len(memos) > 1:
+		if len(memos) > 0:
 			memolist = ["New Memo"]
 			for memo in memos:
-				memolist.append(memo)
+				memolist.append(memo[0])
 			choice = tala.menu(memolist)
 		else:
 			choice = "New Memo"
