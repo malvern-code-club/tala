@@ -376,15 +376,15 @@ class Tala():
 
             # if the first item is selected
             if selected == 0:
-                self.draw_rectangle(draw, 0, 0, 32, 255, 255, 0, items, 0)
-                self.draw_rectangle(draw, 0, 48, 80, 0, 0, 255, items, 1)
+                self.draw_rectangle(draw, 0, 0, 32, 255, 255, 0, selected, items, 0)
+                self.draw_rectangle(draw, 0, 32, 64, 0, 0, 255, selected, items, 1)
             elif selected == (len(items)-1):
-                self.draw_rectangle(draw, 0, 0, 32, 0, 0, 255, items, -1)
-                self.draw_rectangle(draw, 0, 32, 64, 255, 255, 0, items, 0)
+                self.draw_rectangle(draw, 0, 0, 32, 0, 0, 255, selected, items, -1)
+                self.draw_rectangle(draw, 0, 32, 64, 255, 255, 0, selected, items, 0)
             else:
-                self.draw_rectangle(draw, 0, -16, 16, 0, 0, 255, items, -1)
-                self.draw_rectangle(draw, 0, 16, 48, 255, 255, 0, items, 0)
-                self.draw_rectangle(draw, 0, 32, 64, 0, 0, 255, items, 1)
+                self.draw_rectangle(draw, 0, -16, 16, 0, 0, 255, selected, items, -1)
+                self.draw_rectangle(draw, 0, 16, 48, 255, 255, 0, selected, items, 0)
+                self.draw_rectangle(draw, 0, 48, 80, 0, 0, 255, selected, items, 1)
 
             self.display.image(image)
             self.display.display()
@@ -400,7 +400,7 @@ class Tala():
                 return items[selected]
 
 
-    def draw_rectangle(self, draw, x, y, h, o, f1, f2, items, s):
+    def draw_rectangle(self, draw, x, y, h, o, f1, f2, selected, items, s):
         draw.rectangle((x, y, self.width, h), outline=o, fill=f1)
         tw, th = draw.textsize(items[selected+s], font=font)
         padding = (32-th)/2
