@@ -6,6 +6,7 @@ import string
 import datetime
 import json
 import time
+from subprocess import call
 
 conn = sqlite3.connect("database.db")
 c = conn.cursor()
@@ -181,4 +182,5 @@ while True:
 	elif choice == "Power Off":
 		tala.message("Alert", "Power Off")
 		tala.cleanup()
+		call(["sudo", "halt"])
 		break
