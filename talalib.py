@@ -350,8 +350,8 @@ class Tala():
             elif btn == "8":
                 if startline < (len(wrapbody)-1):
                     startline = startline + 1
-            # if button 5 is pressed dismiss the message
-            elif btn == "5":
+            # if # button is pressed dismiss the message
+            elif btn == "#":
                 return
 
     def menu(self, items):
@@ -396,7 +396,7 @@ class Tala():
             elif btn == "8":
                 if selected < (len(items)-1):
                     selected = selected + 1
-            elif btn == "5":
+            elif btn == "#":
                 return items[selected]
 
 
