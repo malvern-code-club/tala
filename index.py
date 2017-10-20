@@ -72,8 +72,30 @@ while True:
 
 		tala.send(encode(message))
 	elif choice == "Private Message":
-		message = tala.type()
-		tala.message("Debug", message) #Replace this with code for sending message
+		def recv_data():
+			print("Thread has run")
+
+		thread_recv_data = threading.Thread(target=recv_data)
+		thread_recv_data.start()
+
+		content = tala.type()
+
+		msg_id = ""
+		i = 0
+		while i != 5:
+			msg_id += random.choice(string.ascii_lowercase)
+
+		timestamp = datetime.datetime.now()
+
+		message = { "content": content,
+					"id": msg_id,
+					"timestamp": timestamp,
+					"sender": "",
+					"recipient": ""
+					}
+
+		tala.send(encode(message))
+		
 	elif choice == "Snake":
 		tala.message("Alert", "[game code here]")
 	elif choice == "Memo":
