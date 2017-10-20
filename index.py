@@ -36,7 +36,6 @@ for table in tables:
 		c.execute("INSERT INTO config (pin) values ('1234')") 
 		conn.commit()
 
-
 tala = talalib.Tala()
 
 tala.clear()
