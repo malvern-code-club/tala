@@ -2,7 +2,6 @@ import time
 
 import serial
 
-import Adafruit_GPIO.SPI as SPI
 import Adafruit_SSD1306
 
 from PIL import Image
@@ -49,16 +48,35 @@ class Tala():
         GPIO.output(13, GPIO.LOW)
         GPIO.output(6, GPIO.LOW)
 
+    def keypad_row(self, row):
+        if row == 1:
+            GPIO.output(26, GPIO.HIGH)
+            GPIO.output(19, GPIO.LOW)
+            GPIO.output(13, GPIO.LOW)
+            GPIO.output(6, GPIO.LOW)
+        if row == 2:
+            GPIO.output(26, GPIO.LOW)
+            GPIO.output(19, GPIO.HIGH)
+            GPIO.output(13, GPIO.LOW)
+            GPIO.output(6, GPIO.LOW)
+        if row == 3:
+            GPIO.output(26, GPIO.LOW)
+            GPIO.output(19, GPIO.LOW)
+            GPIO.output(13, GPIO.HIGH)
+            GPIO.output(6, GPIO.LOW)
+        if row == 4:
+            GPIO.output(26, GPIO.LOW)
+            GPIO.output(19, GPIO.LOW)
+            GPIO.output(13, GPIO.LOW)
+            GPIO.output(6, GPIO.HIGH)
+
     def singlebutton(self, wait=0.05):
         key = ""
 
         # Loop while we haven't got a key
         while key == "":
             # Turn on row 1 but turn off every other row
-            GPIO.output(26, GPIO.HIGH)
-            GPIO.output(19, GPIO.LOW)
-            GPIO.output(13, GPIO.LOW)
-            GPIO.output(6, GPIO.LOW)
+            self.keypad_row(1)
             # If the first column is turned on we know that the first
             # button has been pressed and so on.
             if GPIO.input(17):
@@ -68,10 +86,7 @@ class Tala():
             if GPIO.input(22):
                 key = "3"
 
-            GPIO.output(26, GPIO.LOW)
-            GPIO.output(19, GPIO.HIGH)
-            GPIO.output(13, GPIO.LOW)
-            GPIO.output(6, GPIO.LOW)
+            self.keypad_row(2)
             if GPIO.input(17):
                 key = "4"
             if GPIO.input(27):
@@ -79,10 +94,7 @@ class Tala():
             if GPIO.input(22):
                 key = "6"
 
-            GPIO.output(26, GPIO.LOW)
-            GPIO.output(19, GPIO.LOW)
-            GPIO.output(13, GPIO.HIGH)
-            GPIO.output(6, GPIO.LOW)
+            self.keypad_row(3)
             if GPIO.input(17):
                 key = "7"
             if GPIO.input(27):
@@ -90,10 +102,7 @@ class Tala():
             if GPIO.input(22):
                 key = "9"
 
-            GPIO.output(26, GPIO.LOW)
-            GPIO.output(19, GPIO.LOW)
-            GPIO.output(13, GPIO.LOW)
-            GPIO.output(6, GPIO.HIGH)
+            self.keypad_row(4)
             if GPIO.input(17):
                 key = "*"
             if GPIO.input(27):
@@ -110,10 +119,7 @@ class Tala():
         key = ""
 
         while doloop == True:
-            GPIO.output(26, GPIO.HIGH)
-            GPIO.output(19, GPIO.LOW)
-            GPIO.output(13, GPIO.LOW)
-            GPIO.output(6, GPIO.LOW)
+            self.keypad_row(1)
             if GPIO.input(17):
                 key = "1"
             if GPIO.input(27):
@@ -121,10 +127,7 @@ class Tala():
             if GPIO.input(22):
                 key = "3"
 
-            GPIO.output(26, GPIO.LOW)
-            GPIO.output(19, GPIO.HIGH)
-            GPIO.output(13, GPIO.LOW)
-            GPIO.output(6, GPIO.LOW)
+            self.keypad_row(2)
             if GPIO.input(17):
                 key = "4"
             if GPIO.input(27):
@@ -132,10 +135,7 @@ class Tala():
             if GPIO.input(22):
                 key = "6"
 
-            GPIO.output(26, GPIO.LOW)
-            GPIO.output(19, GPIO.LOW)
-            GPIO.output(13, GPIO.HIGH)
-            GPIO.output(6, GPIO.LOW)
+            self.keypad_row(3)
             if GPIO.input(17):
                 key = "7"
             if GPIO.input(27):
@@ -143,10 +143,7 @@ class Tala():
             if GPIO.input(22):
                 key = "9"
 
-            GPIO.output(26, GPIO.LOW)
-            GPIO.output(19, GPIO.LOW)
-            GPIO.output(13, GPIO.LOW)
-            GPIO.output(6, GPIO.HIGH)
+            self.keypad_row(4)
             if GPIO.input(17):
                 key = "*"
             if GPIO.input(27):
@@ -194,10 +191,7 @@ class Tala():
         while doloop:
             key = ""
 
-            GPIO.output(26, GPIO.HIGH)
-            GPIO.output(19, GPIO.LOW)
-            GPIO.output(13, GPIO.LOW)
-            GPIO.output(6, GPIO.LOW)
+            self.keypad_row(1)
             if GPIO.input(17):
                 key = ""
             if GPIO.input(27):
@@ -205,10 +199,7 @@ class Tala():
             if GPIO.input(22):
                 key = "3"
 
-            GPIO.output(26, GPIO.LOW)
-            GPIO.output(19, GPIO.HIGH)
-            GPIO.output(13, GPIO.LOW)
-            GPIO.output(6, GPIO.LOW)
+            self.keypad_row(2)
             if GPIO.input(17):
                 key = "4"
             if GPIO.input(27):
@@ -216,10 +207,7 @@ class Tala():
             if GPIO.input(22):
                 key = "6"
 
-            GPIO.output(26, GPIO.LOW)
-            GPIO.output(19, GPIO.LOW)
-            GPIO.output(13, GPIO.HIGH)
-            GPIO.output(6, GPIO.LOW)
+            self.keypad_row(3)
             if GPIO.input(17):
                 key = "7"
             if GPIO.input(27):
@@ -326,7 +314,7 @@ class Tala():
         titlefont = ImageFont.truetype("leco1976.ttf", 15)
         font = ImageFont.truetype("FreePixel.ttf", 11)
 
-        startline = 0                
+        startline = 0
 
         while True:
             # clear the canvas
@@ -388,15 +376,15 @@ class Tala():
 
             # if the first item is selected
             if selected == 0:
-                draw_rectangle(draw, 0, 0, 32, 255, 255, 0, 0)
-                draw_rectangle(draw, 0, 48, 80, 0, 0, 255, 1)                
-                draw_rectangle(draw, 0, 32, 64, 0, 0, 255, 1)
+                self.draw_rectangle(draw, 0, 0, 32, 255, 255, 0, selected, items, 0, font)
+                self.draw_rectangle(draw, 0, 32, 64, 0, 0, 255, selected, items, 1, font)
             elif selected == (len(items)-1):
-                draw_rectangle(draw, 0, 0, 32, 0, 0, 255, -1)
-                draw_rectangle(draw, 0, 32, 64, 255, 255, 0, 0)
+                self.draw_rectangle(draw, 0, 0, 32, 0, 0, 255, selected, items, -1, font)
+                self.draw_rectangle(draw, 0, 32, 64, 255, 255, 0, selected, items, 0, font)
             else:
-                draw_rectangle(draw, 0, -16, 16, 0, 0, 255, -1)
-                draw_rectangle(draw, 0, 16, 48, 255, 255, 0, 0)       
+                self.draw_rectangle(draw, 0, -16, 16, 0, 0, 255, selected, items, -1, font)
+                self.draw_rectangle(draw, 0, 16, 48, 255, 255, 0, selected, items, 0, font)
+                self.draw_rectangle(draw, 0, 48, 80, 0, 0, 255, selected, items, 1, font)
 
             self.display.image(image)
             self.display.display()
@@ -408,15 +396,15 @@ class Tala():
             elif btn == "8":
                 if selected < (len(items)-1):
                     selected = selected + 1
-            elif option == "5":
+            elif btn == "5":
                 return items[selected]
-            
-            
-    def draw_rectangle(self, draw, x, y, h, o, f1, f2, s):
-            draw.rectangle((x, y, self.width, h), outline=o, fill=f1)
-            tw, th = draw.textsize(items[selected+s], font=font) 
-            padding = (32-th)/2 
-            draw.text((x+padding, y+padding), items[selected+s], font=font, fill=f2)
+
+
+    def draw_rectangle(self, draw, x, y, h, o, f1, f2, selected, items, s, font):
+        draw.rectangle((x, y, self.width, h), outline=o, fill=f1)
+        tw, th = draw.textsize(items[selected+s], font=font)
+        padding = (32-th)/2
+        draw.text((x+padding, y+padding), items[selected+s], font=font, fill=f2)
 
     def clear(self):
         self.display.clear()
