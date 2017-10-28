@@ -34,7 +34,7 @@ for table in tables:
 				  table["name"] + " (" + table["columns"] + ")")
 	conn.commit()
 	if table["name"] == "config":
-		c.execute("INSERT INTO config (pin) values ('1234')") 
+		c.execute("INSERT INTO config (pin) values ('1234')")
 		conn.commit()
 
 tala = talalib.Tala()
@@ -47,12 +47,12 @@ def encode(data):
 def decode(data):
 	data = json.loads(data) #Load from json
 	return(data)
-	
+
 c.execute("SELECT * FROM config WHERE column='pin'")
 
 
 while True:
-	choice = tala.menu(["Public Message", "Private Message", "Snake", "Memo", "Settings", "Power Off"])
+	choice = tala.menu(["Public Message", "Snake", "Memo", "Settings", "Power Off"])
 	time.sleep(1)
 	if choice == "Public Message":
 		def recv_data(stop_event):
@@ -63,7 +63,7 @@ while True:
 					pass
 				else:
 					tala.message("Message", data)
-		
+
 		t_stop = threading.Event()
 		thread_recv_data = threading.Thread(target=recv_data, args=t_stop)
 		thread_recv_data.start()
@@ -93,31 +93,6 @@ while True:
 			elif choice == "Exit":
 				t_stop.set() # Kills the thread
 				break
-	elif choice == "Private Message":
-		def recv_data():
-			print("Thread has run")
-
-		thread_recv_data = threading.Thread(target=recv_data)
-		thread_recv_data.start()
-
-		content = tala.type()
-
-		msg_id = ""
-		i = 0
-		while i != 5:
-			msg_id += random.choice(string.ascii_lowercase)
-
-		timestamp = datetime.datetime.now()
-
-		message = { "content": content,
-					"id": msg_id,
-					"timestamp": timestamp,
-					"sender": "",
-					"recipient": ""
-					}
-
-		tala.send(encode(message))
-		
 	elif choice == "Snake":
 		tala.message("Alert", "[game code here]")
 		time.sleep(1)
