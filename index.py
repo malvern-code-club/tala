@@ -17,8 +17,12 @@ import sys
 import logging
 import logging.handlers
 
+os.chdir("/opt/tala")
+
 LOG_FILENAME = "/opt/tala.log"
 LOG_LEVEL = logging.INFO
+
+DB_FILENAME = "/opt/tala.db"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(LOG_LEVEL)
@@ -48,7 +52,7 @@ def setupDb():
     global conn
     global c
 
-    conn = sqlite3.connect("/home/pi/database.db")
+    conn = sqlite3.connect(DB_FILENAME)
     c = conn.cursor()
 
     tables = [
@@ -263,7 +267,7 @@ while True:
                             logger.info("Couldn't connect to the internet for update: " + reason)
                             tala.message("Error", "Failed to update, couldn't connect to the internet: " + reason)
                     elif choice == "Via USB":
-                        logger.info("Not implemented")
+                        logger.info("USB update not implemented")
                         tala.message("Via USB", "Not implemented yet...")
             elif choice == "Exit Options":
                 break
