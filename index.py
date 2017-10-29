@@ -194,10 +194,12 @@ while True:
                     if choice == "Via Internet":
                         # Check for connection
                         connection = False
+                        reason = ""
                         try:
-                            urllib.urlopen("http://216.58.192.142", timeout=1)
+                            urllib.request.urlopen("http://216.58.192.142", timeout=1)
                             connection = True
-                        except urllib2.URLError as err:
+                        except urllib.error.URLError as e:
+                            reason = e.reason
                             connection = False
 
                         if connection:
@@ -219,7 +221,8 @@ while True:
                                 log("update", "`updatetest` file doesn't exist. Update unsuccessful.")
                                 tala.message("Update", "Update was unsuccessful. You could try updating via USB.")
                         else:
-                            tala.message("Error", "Failed to update: You are not connected to the internet!")
+                            log("warn", "Couldn't connect to the internet for update: " + reason)
+                            tala.message("Error", "Failed to update, couldn't connect to the internet: " + reason)
                     elif choice == "Via USB":
                         log("update", "Not implemented")
             elif choice == "Exit Options":
