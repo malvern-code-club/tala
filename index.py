@@ -102,10 +102,12 @@ while True:
         else:
             choice = "New Memo"
         if choice == "New Memo":
-                        tala.message("Alert", "Input memo name")
+            tala.popup(body="Input memo name")
+            time.sleep(2)
             memo_name = tala.type()
             time.sleep(1)
-            tala.message("Alert", "Input memo data")
+            tala.popup(body="Input memo data")
+            time.sleep(2)
             memo_data = tala.type()
             time.sleep(1)
             c.execute("INSERT INTO memos (memo_name, memo_data) values (?, ?)", [memo_name, memo_data])
