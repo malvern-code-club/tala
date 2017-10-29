@@ -47,6 +47,8 @@ def setupDb():
                       table["name"] + " (" + table["columns"] + ")")
             conn.commit()
 
+setupDb()
+
 def newUdid():
     udid = "".join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=6))
     c.execute("DELETE * FROM `config` WHERE option = 'udid'")
@@ -57,8 +59,6 @@ def newUdid():
 c.execute("SELECT * FROM `config` WHERE `option` = 'pin'")
 if len(c.fetchone()) < 1:
     newUdid()
-
-setupDb()
 
 tala = talalib.Tala()
 
