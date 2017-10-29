@@ -258,11 +258,19 @@ while True:
                             p = subprocess.Popen(["git", "fetch", "--all"], cwd=REPO_DIR)
                             p.wait()
                             p = subprocess.Popen(["git", "reset", "--hard", "origin/master"], cwd=REPO_DIR)
+                            p.wait()
 
-                            if os.path.exists("updatetest"):
+                            if os.path.exists(REPO_DIR + "updatetest"):
                                 logger.info("`updatetest` file exists. Update successful.")
+
+                                tala.popup("Updating...", "Setting up...")
+                                subprocess.call(["chmod", "755", REPO_DIR + "index.py"])
+                                subprocess.call(["python3", "-m", "pip", "install", "-r", "requirements.txt"])
+                                subprocess.call(["cp", REPO_DIR + "tala.sh", "/etc/init.d"])
+                                subprocess.call(["chmod", "755", "/etc/init.d/tala.sh"])
+
                                 tala.popup("Updated", "Update was successful! Tala will now restart.")
-                                subprocess.call(["service", "tala.sh", "restart"])
+                                subprocess.call(["/etc/init.d/tala.sh", "restart"])
                                 break
                             else:
                                 logger.info("`updatetest` file doesn't exist. Update unsuccessful.")
