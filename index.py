@@ -102,7 +102,7 @@ while True:
 
         timestamp = str(datetime.datetime.utcnow())
 
-        c.execute("SELECT * FROM `config` WHERE `option` = 'udid'")
+        c.execute("SELECT `value` FROM `config` WHERE `option` = 'udid'")
         udid = c.fetchone()[0]
 
         message = {
@@ -159,13 +159,8 @@ while True:
             time.sleep(1)
     elif choice == "Settings":
         while True:
-            choice = tala.menu(["Change Pin", "Reset Device ID", "Clear Data", "Update Tala", "Exit Options"])
-            if choice == "Change Pin":
-                pin = tala.type_numbers()
-                time.sleep(1)
-                tala.message("Debug", "Changed PIN to " + str(pin))
-                time.sleep(1)
-            elif choice == "Reset Device ID":
+            choice = tala.menu(["Reset Device ID", "Clear Data", "Update Tala", "Exit Options"])
+            if choice == "Reset Device ID":
                 result = tala.yn("Are you sure")
                 if result:
                     newUdid()
