@@ -235,6 +235,7 @@ while True:
                     tala.message("Information", "Tala will update even if there's no new version. On the next screen select a way to update.")
                     choice = tala.menu(["Via Internet", "Via USB"])
                     if choice == "Via Internet":
+                        tala.popup("Updating...", "Checking internet connection...")
                         # Check for connection
                         connection = False
                         try:
@@ -244,6 +245,7 @@ while True:
                             connection = False
 
                         if connection:
+                            tala.popup("Updating...", "Preparing for update...")
                             if os.path.exists(REPO_DIR + "updatetest"):
                                 logger.info("Deleting `updatetest` file")
                                 os.remove(REPO_DIR + "updatetest")
@@ -264,7 +266,8 @@ while True:
                                 tala.popup("Updating...", "Changing file permissions...")
                                 subprocess.call(["chmod", "755", REPO_DIR + "index.py"])
                                 tala.popup("Updating...", "Installing Python modules...")
-                                subprocess.call(["python3", "-m", "pip", "install", "-r", "requirements.txt"])
+                                p = subprocess.Popen(["python3", "-m", "pip", "install", "-r", "requirements.txt"], cwd=REPO_DIR)
+                                p.wait()
                                 tala.popup("Updating...", "Updating daemon script...")
                                 subprocess.call(["cp", REPO_DIR + "tala.sh", "/etc/init.d"])
                                 subprocess.call(["chmod", "755", "/etc/init.d/tala.sh"])
