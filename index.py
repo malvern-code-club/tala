@@ -11,31 +11,31 @@ from subprocess import call
 conn = sqlite3.connect("database.db")
 c = conn.cursor()
 
-tables = [
-	{
-		"name": "memos",
-		"columns": "memo_name TEXT, memo_data TEXT"
-	},
-	{
-		"name": "config",
-		"columns": "pin TEXT"
-	}
-]
+def setupDb():
+    tables = [
+    	{
+    		"name": "memos",
+    		"columns": "memo_name TEXT, memo_data TEXT"
+    	},
+    	{
+    		"name": "config",
+    		"columns": "option TEXT, value TEXT"
+    	}
+    ]
 
-for table in tables:
-	c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", [
-			  table["name"]])
-	data = c.fetchall()
+    for table in tables:
+    	c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", [
+    			  table["name"]])
+    	data = c.fetchall()
 
-	if len(data) <= 0:  # If table doesn't exist
-		print("Creating table " + table["name"])
-		print("CREATE TABLE " + table["name"] + " (" + table["columns"] + ")")
-		c.execute("CREATE TABLE " +
-				  table["name"] + " (" + table["columns"] + ")")
-	conn.commit()
-	if table["name"] == "config":
-		c.execute("INSERT INTO config (pin) values ('1234')")
-		conn.commit()
+    	if len(data) <= 0:  # If table doesn't exist
+    		print("Creating table " + table["name"])
+    		print("CREATE TABLE " + table["name"] + " (" + table["columns"] + ")")
+    		c.execute("CREATE TABLE " +
+    				  table["name"] + " (" + table["columns"] + ")")
+        	conn.commit()
+
+setupDb()
 
 tala = talalib.Tala()
 
@@ -47,9 +47,6 @@ def encode(data):
 def decode(data):
 	data = json.loads(data) #Load from json
 	return(data)
-
-c.execute("SELECT * FROM config WHERE column='pin'")
-
 
 while True:
 	choice = tala.menu(["Public Message", "Memo", "Settings", "Power Off"])
@@ -128,7 +125,7 @@ while True:
 			time.sleep(1)
 	elif choice == "Settings":
 		while True:
-			choice = tala.menu(["Change Pin", "Reset Device Key", "Update Tala", "Exit Options"])
+			choice = tala.menu(["Change Pin", "Reset Device Key", "Clear Data", "Update Tala", "Exit Options"])
 			if choice == "Change Pin":
 				pin = tala.type_numbers()
 				time.sleep(1)
@@ -141,10 +138,23 @@ while True:
 					time.sleep(1)
 					#No actual code for this yet
 				elif not result:
-					tala.message("Alert", "Did not reset Device Key")
+					tala.message("Alert", "No changes made.")
 					time.sleep(1)
+			elif choice == "Clear Data":
+				result = tala.yn("Are you sure")
+				if result:
+                    c.execute("DROP TABLE *;")
+                    tala.popup(body="Database purged!")
+                    time.sleep(2)
+                    tala.popup(body="Recreating Database...")
+                    setupDb()
+                    tala.message("Cleared", "Successfully cleared data.")
+                    time.sleep(1)
+                elif not result:
+                    tala.message("Alert", "No changed made.")
+                    time.sleep(1)
 			elif choice == "Update Tala":
-				result = 	tala.yn("Are you sure you'd like to update")
+				result = tala.yn("Are you sure you'd like to update")
 			elif choice == "Exit Options":
 				break
 	elif choice == "Power Off":
