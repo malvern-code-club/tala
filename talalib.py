@@ -330,12 +330,13 @@ class Tala():
         # clear the canvas
         draw.rectangle((0, 0, self.width, self.height), outline=0, fill=0)
 
+        padding = 5
+
         if title != "":
             # get width and height of title
             titlewidth, titleheight = draw.textsize(title, font=titlefont)
             # draw a box to put the title in
             draw.rectangle((0, 0, self.width, titleheight+10), outline=255, fill=255)
-            padding = 5
             # draw the title text
             draw.text((0+padding, 0+padding), title, font=titlefont, fill=0)
         else:
