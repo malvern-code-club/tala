@@ -75,6 +75,7 @@ tala.clear()
 c.execute("SELECT * FROM `config` WHERE `option` = 'name'")
 if c.fetchone() == None:
     tala.message("First Run", "You don't have a name set! Why don't you introduce yourself? Press the checkmark button and then use the keys to type your name.")
+    time.sleep(1)
     name = tala.type()
     c.execute("INSERT INTO `config` (`option`, `value`) VALUES ('name', ?)", [name])
     conn.commit()
@@ -173,6 +174,7 @@ while True:
         while True:
             choice = tala.menu(["Reset Device ID", "Clear Data", "Update Tala", "Exit Options"])
             if choice == "Reset Device ID":
+                time.sleep(1)
                 result = tala.yn("Are you sure")
                 if result:
                     newUdid()
@@ -182,6 +184,7 @@ while True:
                     tala.message("Reset UDID", "No changes made.")
                     time.sleep(1)
             elif choice == "Clear Data":
+                time.sleep(1)
                 result = tala.yn("Are you sure")
                 if result:
                     log("info", "Deleting database...")
@@ -198,6 +201,7 @@ while True:
                     tala.message("Alert", "No changed made.")
                     time.sleep(1)
             elif choice == "Update Tala":
+                time.sleep(1)
                 result = tala.yn("Are you sure you'd like to update")
                 if result:
                     tala.message("Information", "Tala will update even if there's no new version. On the next screen select a way to update.")
@@ -229,7 +233,7 @@ while True:
                             if os.path.exists("updatetest"):
                                 log("update", "`updatetest` file exists. Update successful.")
                                 tala.popup("Updated", "Update was successful! Tala will now restart.")
-                                os.execl(sys.executable, sys.executable, *sys.argv)
+                                call(["service", "tala.sh", "restart"])
                                 break
                             else:
                                 log("update", "`updatetest` file doesn't exist. Update unsuccessful.")
@@ -239,15 +243,15 @@ while True:
                             tala.message("Error", "Failed to update, couldn't connect to the internet: " + reason)
                     elif choice == "Via USB":
                         log("update", "Not implemented")
+                        tala.message("Via USB", "Not implemented yet...")
             elif choice == "Exit Options":
                 break
     elif choice == "Power Off":
-        choice = tala.menu(["Power Off", "Don't Power Off"])
-        if choice == "Power Off":
-            option = tala.yn("Power Off", "Are you sure you'd like to power off?")
-            if option:
-                log("warn", "=== POWERING OFF DEVICE ===")
-                tala.popup(body="Device shutting down. Wait up to 10s before removing power.")
-                tala.cleanup()
-                call(["sudo", "halt"])
-                break
+        time.sleep(1)
+        option = tala.yn("Are you sure you'd like to power off?")
+        if option:
+            log("warn", "=== POWERING OFF DEVICE ===")
+            tala.popup(body="Device shutting down. Wait up to 10s before removing power.")
+            tala.cleanup()
+            call(["sudo", "halt"])
+            break
