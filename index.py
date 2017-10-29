@@ -100,7 +100,7 @@ while True:
 
         msg_id = generateId()
 
-        timestamp = datetime.datetime.now()
+        timestamp = str(datetime.datetime.utcnow())
 
         c.execute("SELECT * FROM `config` WHERE `option` = 'udid'")
         udid = c.fetchone()[0]
