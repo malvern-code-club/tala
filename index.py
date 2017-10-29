@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import talalib
 import sqlite3
 import threading
