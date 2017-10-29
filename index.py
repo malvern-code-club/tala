@@ -148,12 +148,15 @@ while True:
         c.execute("SELECT `value` FROM `config` WHERE `option` = 'udid'")
         udid = c.fetchone()[0]
 
+        c.execute("SELECT `value` FROM `config` WHERE `option` = 'name'")
+        name = c.fetchone()[0]
+
         message = {
                     "content": content,
                     "id": msg_id,
                     "timestamp": timestamp,
                     "sender": {
-                        "name": "Jake Walker",
+                        "name": name,
                         "udid": udid
                     }
                 }
@@ -202,7 +205,7 @@ while True:
             time.sleep(1)
     elif choice == "Settings":
         while True:
-            choice = tala.menu(["Reset Device ID", "Clear Data", "Update Tala", "Exit Options"])
+            choice = tala.menu(["Change Name", "Reset Device ID", "Clear Data", "Update Tala", "Exit Options"])
             if choice == "Reset Device ID":
                 time.sleep(1)
                 result = tala.yn("Are you sure")
@@ -213,6 +216,18 @@ while True:
                 elif not result:
                     tala.message("Reset UDID", "No changes made.")
                     time.sleep(1)
+            elif choice == "Change Name":
+                time.sleep(1)
+                c.execute("SELECT `value` FROM `config` WHERE `option` = 'name'")
+                name = c.fetchone()[0]
+                result = tala.yn("Current name is " + name + ". Change")
+                if result:
+                    tala.popup(body="Please type new name")
+                    time.sleep(1)
+                    newname = tala.type()
+                    c.execute("UPDATE `config` SET `value` = ? WHERE `option` = 'name'", [newname])
+                    conn.commit()
+                    tala.message("Changed", "Your name has been changed from " + name + " to " + newname + "!")
             elif choice == "Clear Data":
                 time.sleep(1)
                 result = tala.yn("Are you sure")
@@ -322,7 +337,7 @@ while True:
                                     logger.info("No files found on " + device + "!")
                                 else:
                                     files.append("Exit")
-                                    choice = tala.menu([files])
+                                    choice = tala.menu(files)
                                     if choice != "Exit":
                                         yn = tala.yn("Copy & Overwrite " + choice)
                                         if yn:
