@@ -8,7 +8,7 @@ import string
 import datetime
 import json
 import time
-from subprocess import call
+import subprocess
 import os
 import datetime
 import urllib.request
@@ -17,12 +17,15 @@ import sys
 import logging
 import logging.handlers
 
-os.chdir("/opt/tala")
+REPO_DIR = "/opt/tala/"
+STORAGE_DIR = "/opt/"
 
-LOG_FILENAME = "/opt/tala.log"
+os.chdir(REPO_DIR)
+
+LOG_FILENAME = STORAGE_DIR + "tala.log"
 LOG_LEVEL = logging.INFO
 
-DB_FILENAME = "/opt/tala.db"
+DB_FILENAME = STORAGE_DIR + "tala.db"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(LOG_LEVEL)
@@ -213,7 +216,7 @@ while True:
                 result = tala.yn("Are you sure")
                 if result:
                     logger.info("Deleting database...")
-                    os.remove("database.db")
+                    os.remove(DB_FILENAME)
                     tala.popup("Purging...", "Database purged!")
                     time.sleep(2)
                     tala.popup("Purging...", "Recreating Database...")
@@ -243,22 +246,23 @@ while True:
                             connection = False
 
                         if connection:
-                            if os.path.exists("updatetest"):
+                            if os.path.exists(REPO_DIR + "updatetest"):
                                 logger.info("Deleting `updatetest` file")
-                                os.remove("updatetest")
+                                os.remove(REPO_DIR + "updatetest")
                             else:
                                 logger.info("There is no `updatetest` file, updating anyway.")
 
                             tala.popup("Updating...", "Please wait while updating...")
 
                             # This should update tala from github (in theory)
-                            call(["git", "fetch", "--all"])
-                            call(["git", "reset", "--hard", "origin/master"])
+                            p = subprocess.Popen(["git", "fetch", "--all"], cwd=REPO_DIR)
+                            p.wait()
+                            p = subprocess.Popen(["git", "reset", "--hard", "origin/master"], cwd=REPO_DIR)
 
                             if os.path.exists("updatetest"):
                                 logger.info("`updatetest` file exists. Update successful.")
                                 tala.popup("Updated", "Update was successful! Tala will now restart.")
-                                call(["service", "tala.sh", "restart"])
+                                subprocess.call(["service", "tala.sh", "restart"])
                                 break
                             else:
                                 logger.info("`updatetest` file doesn't exist. Update unsuccessful.")
@@ -278,5 +282,5 @@ while True:
             logger.info("=== POWERING OFF DEVICE ===")
             tala.popup(body="Device shutting down. Wait up to 10s before removing power.")
             tala.cleanup()
-            call(["sudo", "halt"])
+            subprocess.call(["sudo", "halt"])
             break
