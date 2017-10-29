@@ -51,4 +51,4 @@ echo -e "\e[0;44m [4/4] START TALA... \e[0m"
 echo -e "\e[0;34m[\e[1;34m#\e[0;34m]\e[0;1m sudo /etc/init.d/tala.sh start \e[0m"
 sudo /etc/init.d/tala.sh start
 
-echo -e "\e[0;44m DONE! TALA IS NOW INSTALLED!\e[0m"
+echo -e "\e[0;44m TALA IS NOW INSTALLED ;)\e[0m"

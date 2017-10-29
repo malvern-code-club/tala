@@ -72,6 +72,13 @@ tala = talalib.Tala()
 
 tala.clear()
 
+c.execute("SELECT * FROM `config` WHERE `option` = 'name'")
+if c.fetchone() == None:
+    tala.message("First Run", "You don't have a name set! Why don't you introduce yourself? Press the checkmark button and then use the keys to type your name.")
+    name = tala.type()
+    c.execute("INSERT INTO `config` (`option`, `value`) VALUES ('name', ?)", [name])
+    conn.commit()
+
 def encode(data):
     data = json.dumps(data) #Json dump message
     return(data)
