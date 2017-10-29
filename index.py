@@ -59,7 +59,7 @@ def newUdid():
     conn.commit()
     log("info", "Created new Unique Device ID: " + udid + ".")
 
-c.execute("SELECT * FROM `config` WHERE `option` = 'pin'")
+c.execute("SELECT * FROM `config` WHERE `option` = 'udid'")
 if c.fetchone() == None:
     newUdid()
 
