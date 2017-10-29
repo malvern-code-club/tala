@@ -76,49 +76,49 @@ while True:
     choice = tala.menu(["Public Message", "Memo", "Settings", "Power Off"])
     time.sleep(1)
     if choice == "Public Message":
-        def recv_data(stop_event):
-            while (not stop_event.is_set()):
-                data = tala.receive()
-                time.sleep(1)
-                if data == "":
-                    pass
-                else:
-                    tala.message("Message", data)
+        ## ![QUANTUMBLACK] TODO: Make the below threading code run forever while Tala is running
 
-        t_stop = threading.Event()
-        thread_recv_data = threading.Thread(target=recv_data, args=t_stop)
-        thread_recv_data.start()
+        #def recv_data(stop_event):
+        #    while (not stop_event.is_set()):
+        #        data = tala.receive()
+        #        time.sleep(1)
+        #        if data == "":
+        #            pass
+        #        else:
+        #            tala.message("Message", data)
+
+        #t_stop = threading.Event()
+        #thread_recv_data = threading.Thread(target=recv_data, args=t_stop)
+        #thread_recv_data.start()
+
+        ## ![QUANTUMBLACK] /TODO
 
         content = tala.type()
+
+        msg_id = ""
+        i = 0
+        while i != 5:
+            msg_id += random.choice(string.ascii_lowercase)
+
+        timestamp = datetime.datetime.now()
+
+        c.execute("SELECT * FROM `config` WHERE `option` = 'udid'")
+        udid = c.fetchonce()[0]
+
+        message = {
+                    "content": content,
+                    "id": msg_id,
+                    "timestamp": timestamp,
+                    "sender": {
+                        "name": "Jake Walker",
+                        "udid": udid
+                    }
+                }
+
+        log("info", "Sending Public Message: " + encode(message))
+
+        tala.send(encode(message))
         time.sleep(1)
-        while True:
-            choice = tala.menu(["Send a message", "Exit"])
-            if choice == "Send a message":
-                msg_id = ""
-                i = 0
-                while i != 5:
-                    msg_id += random.choice(string.ascii_lowercase)
-
-                timestamp = datetime.datetime.now()
-
-                c.execute("SELECT * FROM `config` WHERE `option` = 'udid'")
-                udid = c.fetchonce()[0]
-
-                message = {
-                            "content": content,
-                            "id": msg_id,
-                            "timestamp": timestamp,
-                            "sender": {
-                                "name": "Jake Walker",
-                                "udid": udid
-                            }
-                        }
-                log("info", "Sending Public Message: " + encode(message))
-                tala.send(encode(message))
-                time.sleep(1)
-            elif choice == "Exit":
-                t_stop.set() # Kills the thread
-                break
     elif choice == "Memo":
         c.execute("SELECT * FROM memos")
         memos = c.fetchall()
