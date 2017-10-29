@@ -24,7 +24,7 @@ def setupDb():
     global conn
     global c
 
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect("/home/pi/database.db")
     c = conn.cursor()
 
     tables = [
@@ -211,7 +211,8 @@ while True:
                                 log("update", "There is no `updatetest` file, updating anyway.")
 
                             # This should update tala from github (in theory)
-                            call(["git", "pull"])
+                            call(["git", "fetch", "--all"])
+                            call(["git", "reset", "--hard", "origin/master"])
 
                             if os.path.exists("updatetest"):
                                 log("update", "`updatetest` file exists. Update successful.")
