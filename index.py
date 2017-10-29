@@ -52,6 +52,10 @@ def newUdid():
     conn.commit()
     log("info", "Created new Unique Device ID: " + udid + ".")
 
+c.execute("SELECT * FROM `config` WHERE `option` = 'pin'")
+if len(c.fetchone()) < 1:
+    newUdid()
+
 setupDb()
 
 tala = talalib.Tala()
@@ -95,13 +99,16 @@ while True:
 
                 timestamp = datetime.datetime.now()
 
+                c.execute("SELECT * FROM `config` WHERE `option` = 'udid'")
+                udid = c.fetchonce()[0]
+
                 message = {
                             "content": content,
                             "id": msg_id,
                             "timestamp": timestamp,
                             "sender": {
-                                name: "Jake Walker",
-                                uid: ""
+                                "name": "Jake Walker",
+                                "udid": udid
                             }
                         }
                 log("info", "Sending Public Message: " + encode(message))
@@ -150,20 +157,20 @@ while True:
             time.sleep(1)
     elif choice == "Settings":
         while True:
-            choice = tala.menu(["Change Pin", "Reset Device Key", "Clear Data", "Update Tala", "Exit Options"])
+            choice = tala.menu(["Change Pin", "Reset Device ID", "Clear Data", "Update Tala", "Exit Options"])
             if choice == "Change Pin":
                 pin = tala.type_numbers()
                 time.sleep(1)
                 tala.message("Debug", "Changed PIN to " + str(pin))
                 time.sleep(1)
-            elif choice == "Reset Device Key":
+            elif choice == "Reset Device ID":
                 result = tala.yn("Are you sure")
                 if result:
-                    tala.message("Alert", "Device Key reset")
+                    newUdid()
+                    tala.message("Reset UDID", "Device ID regenerated!")
                     time.sleep(1)
-                    #No actual code for this yet
                 elif not result:
-                    tala.message("Alert", "No changes made.")
+                    tala.message("Reset UDID", "No changes made.")
                     time.sleep(1)
             elif choice == "Clear Data":
                 result = tala.yn("Are you sure")
