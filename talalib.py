@@ -308,10 +308,10 @@ class Tala():
             # check for button presses
             btn = self.singlebutton()
             # if button * is pressed return yes
-            if btn == "*":
+            if btn == "#":
                 return True
             # if # button is pressed return no
-            elif btn == "#":
+            elif btn == "*":
                 return False
 
     def popup(self, title="", body=""):
