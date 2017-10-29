@@ -48,13 +48,21 @@ screens and the pinouts on both are different. Be careful!***
 
 ## Installation
 
+1. Start by flashing the latest Raspbian Lite onto an SD card.
+2. After it has booted type `sudo raspi-config` to bring up a configuration
+window, select `Interfacing Options` -> `I2C` -> `Yes`, then `Interfacing Options`
+-> `Serial` -> `No` -> `Yes`. **Rebooting now is not required as we will do it
+in the 4th step.**
+3. Setup a Wi-Fi connection (you can skip this if you are using ethernet) by
+editing this file with the command: `sudo nano /etc/wpa_supplicant/wpa_supplicant.conf`.
+Then adding this block of code (changing the placeholders to your network) to the
+bottom of the file:
 ```
-sudo apt update
-sudo apt install build-essential python3-dev python3-pip
-
-sudo apt install python3-pil python3-smbus python3-serial git
-
-git clone https://github.com/adafruit/Adafruit_Python_SSD1306.git
-cd Adafruit_Python_SSD1306
-sudo python3 setup.py install
+network={
+  ssid="YOUR NETWORK NAME HERE INSIDE THE QUOTES"
+  psk="YOUR NETWORK PASSWORD HERE INSIDE THE QUOTES"
+}
 ```
+4. Reboot using the command `sudo reboot`.
+5. Start the automatic install script with this command `curl -sSL https://goo.gl/xPTBjq | sudo bash`.
+6. Et volia!

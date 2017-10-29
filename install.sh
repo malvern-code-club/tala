@@ -38,11 +38,15 @@ echo -e "\e[0;34m[\e[1;34m#\e[0;34m]\e[0;1m cd tala\e[0m"
 cd tala
 echo -e "\e[0;34m[\e[1;34m#\e[0;34m]\e[0;1m chmod 755 index.py\e[0m"
 chmod 755 index.py
+echo -e "\e[0;34m[\e[1;34m#\e[0;34m]\e[0;1m python3 -m pip install -r requirements.txt\e[0m"
+python3 -m pip install -r requirements.txt
 
 echo -e "\e[0;44m [3/4] INSTALL TALA... \e[0m"
 
 echo -e "\e[0;34m[\e[1;34m#\e[0;34m]\e[0;1m cp tala.sh /etc/init.d\e[0m"
 cp tala.sh /etc/init.d
+echo -e "\e[0;34m[\e[1;34m#\e[0;34m]\e[0;1m chmod 755 /etc/init.d/tala.sh\e[0m"
+chmod 755 /etc/init.d/tala.sh
 echo -e "\e[0;34m[\e[1;34m#\e[0;34m]\e[0;1m update-rc.d tala.sh defaults\e[0m"
 update-rc.d tala.sh defaults
 
