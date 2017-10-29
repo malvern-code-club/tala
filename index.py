@@ -49,8 +49,11 @@ def setupDb():
 
 setupDb()
 
+def generateId():
+    return "".join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6))
+
 def newUdid():
-    udid = "".join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6))
+    udid = generateId()
     c.execute("DELETE FROM `config` WHERE option = 'udid'")
     c.execute("INSERT INTO `config` (`option`, `value`) VALUES ('udid', ?)", [udid])
     conn.commit()
@@ -95,10 +98,7 @@ while True:
 
         content = tala.type()
 
-        msg_id = ""
-        i = 0
-        while i != 5:
-            msg_id += random.choice(string.ascii_lowercase)
+        msg_id = generateId()
 
         timestamp = datetime.datetime.now()
 
