@@ -14,7 +14,7 @@ conn = None
 c = None
 
 def log(level, content):
-    print("[" + str(datetime.datetime.utcnow()) + "] TALA (" + type + ") -> " + content)
+    print("[" + str(datetime.datetime.utcnow()) + "] (TALA) {" + level + "} -> " + content)
 
 log("info", "=== STARTED TALA ===")
 
