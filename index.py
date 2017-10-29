@@ -14,14 +14,35 @@ import datetime
 import urllib.request
 import urllib.error
 import sys
+import logging
+import logging.handlers
+
+LOG_FILENAME = "/opt/tala.log"
+LOG_LEVEL = logging.INFO
+
+logger = logging.getLogger(__name__)
+logger.setLevel(LOG_LEVEL)
+handler = logging.handlers.TimedRotatingFileHandler(LOG_FILENAME, when="midnight", backupCount=2)
+formatter = logging.Formatter("%(asctime)s %(levelname)-8s %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+class TalaLogger(object):
+    def __init__(self, logger, level):
+        self.logger = logger
+        self.level = level
+
+    def write(self, message):
+        if message.rstrip() != "":
+            self.logger.log(self.level, message.rstrip())
+
+sys.stdout = TalaLogger(logger, logging.INFO)
+sys.stderr = TalaLogger(logger, logging.ERROR)
 
 conn = None
 c = None
 
-def log(level, content):
-    print("[" + str(datetime.datetime.utcnow()) + "] (TALA) {" + level + "} -> " + content)
-
-log("info", "=== STARTED TALA ===")
+logger.info("=== STARTED TALA ===")
 
 def setupDb():
     global conn
@@ -47,7 +68,7 @@ def setupDb():
         data = c.fetchall()
 
         if len(data) <= 0:  # If table doesn't exist
-            log("info", "Creating table " + table["name"] + " with query: CREATE TABLE " + table["name"] + " (" + table["columns"] + ")")
+            logger.info("Creating table " + table["name"] + " with query: CREATE TABLE " + table["name"] + " (" + table["columns"] + ")")
             c.execute("CREATE TABLE " +
                       table["name"] + " (" + table["columns"] + ")")
             conn.commit()
@@ -62,7 +83,7 @@ def newUdid():
     c.execute("DELETE FROM `config` WHERE option = 'udid'")
     c.execute("INSERT INTO `config` (`option`, `value`) VALUES ('udid', ?)", [udid])
     conn.commit()
-    log("info", "Created new Unique Device ID: " + udid + ".")
+    logger.info("Created new Unique Device ID: " + udid + ".")
 
 c.execute("SELECT * FROM `config` WHERE `option` = 'udid'")
 if c.fetchone() == None:
@@ -88,7 +109,7 @@ def decode(data):
     return(data)
 
 while True:
-    log("info", "Showing main menu")
+    logger.info("Showing main menu")
     choice = tala.menu(["Public Message", "Memo", "Settings", "Power Off"])
     time.sleep(1)
     if choice == "Public Message":
@@ -128,7 +149,7 @@ while True:
                     }
                 }
 
-        log("info", "Sending Public Message: " + encode(message))
+        logger.info("Sending Public Message: " + encode(message))
 
         tala.send(encode(message))
         time.sleep(1)
@@ -136,14 +157,14 @@ while True:
         c.execute("SELECT * FROM memos")
         memos = c.fetchall()
         if len(memos) > 0:
-            log("info", "Showing memo menu.")
+            logger.info("Showing memo menu.")
             memolist = ["New Memo", "Delete Memo"]
             for memo in memos:
                 memolist.append(memo[0])
             choice = tala.menu(memolist)
             time.sleep(1)
         else:
-            log("info", "No memos created, automatically choosing to create new memo.")
+            logger.info("No memos created, automatically choosing to create new memo.")
             choice = "New Memo"
         if choice == "New Memo":
             tala.popup(body="Input memo title")
@@ -154,7 +175,7 @@ while True:
             time.sleep(2)
             memo_data = tala.type()
             time.sleep(1)
-            log("info", "Created new memo with title '" + memo_name + "' and body '" + memo_data + "'")
+            logger.info("Created new memo with title '" + memo_name + "' and body '" + memo_data + "'")
             c.execute("INSERT INTO memos (memo_name, memo_data) values (?, ?)", [memo_name, memo_data])
             conn.commit()
         elif choice == "Delete Memo":
@@ -187,16 +208,16 @@ while True:
                 time.sleep(1)
                 result = tala.yn("Are you sure")
                 if result:
-                    log("info", "Deleting database...")
+                    logger.info("Deleting database...")
                     os.remove("database.db")
                     tala.popup("Purging...", "Database purged!")
                     time.sleep(2)
                     tala.popup("Purging...", "Recreating Database...")
-                    log("info", "Setting up database...")
+                    logger.info("Setting up database...")
                     setupDb()
                     tala.message("Purged", "Successfully cleared data.")
                     time.sleep(1)
-                    log("info", "Database purge complete!")
+                    logger.info("Database purge complete!")
                 elif not result:
                     tala.message("Alert", "No changed made.")
                     time.sleep(1)
@@ -219,10 +240,10 @@ while True:
 
                         if connection:
                             if os.path.exists("updatetest"):
-                                log("update", "Deleting `updatetest` file")
+                                logger.info("Deleting `updatetest` file")
                                 os.remove("updatetest")
                             else:
-                                log("update", "There is no `updatetest` file, updating anyway.")
+                                logger.info("There is no `updatetest` file, updating anyway.")
 
                             tala.popup("Updating...", "Please wait while updating...")
 
@@ -231,18 +252,18 @@ while True:
                             call(["git", "reset", "--hard", "origin/master"])
 
                             if os.path.exists("updatetest"):
-                                log("update", "`updatetest` file exists. Update successful.")
+                                logger.info("`updatetest` file exists. Update successful.")
                                 tala.popup("Updated", "Update was successful! Tala will now restart.")
                                 call(["service", "tala.sh", "restart"])
                                 break
                             else:
-                                log("update", "`updatetest` file doesn't exist. Update unsuccessful.")
+                                logger.info("`updatetest` file doesn't exist. Update unsuccessful.")
                                 tala.message("Update", "Update was unsuccessful. You could try updating via USB.")
                         else:
-                            log("warn", "Couldn't connect to the internet for update: " + reason)
+                            logger.info("Couldn't connect to the internet for update: " + reason)
                             tala.message("Error", "Failed to update, couldn't connect to the internet: " + reason)
                     elif choice == "Via USB":
-                        log("update", "Not implemented")
+                        logger.info("Not implemented")
                         tala.message("Via USB", "Not implemented yet...")
             elif choice == "Exit Options":
                 break
@@ -250,7 +271,7 @@ while True:
         time.sleep(1)
         option = tala.yn("Are you sure you'd like to power off?")
         if option:
-            log("warn", "=== POWERING OFF DEVICE ===")
+            logger.info("=== POWERING OFF DEVICE ===")
             tala.popup(body="Device shutting down. Wait up to 10s before removing power.")
             tala.cleanup()
             call(["sudo", "halt"])
