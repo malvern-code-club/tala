@@ -237,12 +237,10 @@ while True:
                     if choice == "Via Internet":
                         # Check for connection
                         connection = False
-                        reason = ""
                         try:
                             urllib.request.urlopen("http://216.58.192.142", timeout=1)
                             connection = True
                         except urllib.error.URLError as e:
-                            reason = e.reason
                             connection = False
 
                         if connection:
@@ -263,21 +261,24 @@ while True:
                             if os.path.exists(REPO_DIR + "updatetest"):
                                 logger.info("`updatetest` file exists. Update successful.")
 
-                                tala.popup("Updating...", "Setting up...")
+                                tala.popup("Updating...", "Changing file permissions...")
                                 subprocess.call(["chmod", "755", REPO_DIR + "index.py"])
+                                tala.popup("Updating...", "Installing Python modules...")
                                 subprocess.call(["python3", "-m", "pip", "install", "-r", "requirements.txt"])
+                                tala.popup("Updating...", "Updating daemon script...")
                                 subprocess.call(["cp", REPO_DIR + "tala.sh", "/etc/init.d"])
                                 subprocess.call(["chmod", "755", "/etc/init.d/tala.sh"])
 
-                                tala.popup("Updated", "Update was successful! Tala will now restart.")
+                                tala.popup("Updated", "Update was successful! Tala will now restart in 3 seconds...")
+                                time.sleep(3)
                                 subprocess.call(["/etc/init.d/tala.sh", "restart"])
                                 break
                             else:
                                 logger.info("`updatetest` file doesn't exist. Update unsuccessful.")
                                 tala.message("Update", "Update was unsuccessful. You could try updating via USB.")
                         else:
-                            logger.info("Couldn't connect to the internet for update: " + reason)
-                            tala.message("Error", "Failed to update, couldn't connect to the internet: " + reason)
+                            logger.info("Couldn't connect to the internet for update")
+                            tala.message("Error", "Failed to update, couldn't connect to the internet")
                     elif choice == "Via USB":
                         logger.info("USB update not implemented")
                         tala.message("Via USB", "Not implemented yet...")
