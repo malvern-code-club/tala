@@ -16,6 +16,8 @@ c = None
 def log(level, content):
     print("[" + str(datetime.datetime.utcnow()) + "] (Tala) {" + type + "} -> " + content)
 
+log("info", "=== STARTED TALA ===")
+
 def setupDb():
     global conn
     global c
