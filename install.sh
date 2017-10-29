@@ -29,6 +29,14 @@ echo -e "\e[0;34m[\e[1;34m#\e[0;34m]\e[0;1m python3 setup.py install\e[0m"
 python3 setup.py install
 echo -e "\e[0;34m[\e[1;34m#\e[0;34m]\e[0;1m cd ../\e[0m"
 cd ../
+echo -e "\e[0;34m[\e[1;34m#\e[0;34m]\e[0;1m rm -rf Adafruit_Python_SSD1306\e[0m"
+rm -rf Adafruit_Python_SSD1306
+echo -e "\e[0;34m[\e[1;34m#\e[0;34m]\e[0;1m git clone https://github.com/MrVallentin/mount.py\e[0m"
+git clone https://github.com/MrVallentin/mount.py
+echo -e "\e[0;34m[\e[1;34m#\e[0;34m]\e[0;1m python3 mount.py/setup.py install\e[0m"
+python3 mount.py/setup.py install
+echo -e "\e[0;34m[\e[1;34m#\e[0;34m]\e[0;1m rm -rf mount.py\e[0m"
+rm -rf mount.py
 
 echo -e "\e[0;44m [2/4] DOWNLOAD AND SETUP TALA... \e[0m"
 
@@ -55,4 +63,4 @@ echo -e "\e[0;44m [4/4] START TALA... \e[0m"
 echo -e "\e[0;34m[\e[1;34m#\e[0;34m]\e[0;1m sudo /etc/init.d/tala.sh start \e[0m"
 sudo /etc/init.d/tala.sh start
 
-echo -e "\e[0;44m TALA IS NOW INSTALLED ;)\e[0m"
+echo -e "\e[0;44m TALA IS NOW INSTALLED ;) \e[0m"

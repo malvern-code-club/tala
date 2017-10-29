@@ -16,6 +16,8 @@ import urllib.error
 import sys
 import logging
 import logging.handlers
+import mount
+import shutil
 
 REPO_DIR = "/opt/tala/"
 STORAGE_DIR = "/opt/"
@@ -283,13 +285,66 @@ while True:
                             logger.info("Couldn't connect to the internet for update")
                             tala.message("Error", "Failed to update, couldn't connect to the internet")
                     elif choice == "Via USB":
-                        logger.info("USB update not implemented")
-                        tala.message("Via USB", "Not implemented yet...")
+                        tala.message("Update", "Please PLUG IN your USB drive to update from then press the checkmark to continue.")
+
+                        devices = mount.list_media_devices()
+
+                        logger.info(str(len(devices)) + " device(s) found.")
+
+                        device = None
+
+                        if len(devices) <= 0:
+                            tala.message("Failure", "Couldn't detect any USB drives.")
+                        elif len(devices) == 1:
+                            tala.popup("Update", "Only 1 drive found, using that one.")
+                            time.sleep(2)
+                            device = devices[0]
+                        else:
+                            tala.popup(body="Select a drive to copy from")
+                            time.sleep(2)
+                            tala.menu(devices)
+
+                        if device != None:
+                            logger.info("Using device " + device)
+
+                            mount.mount(device)
+
+                            if mount.is_mounted(device):
+                                files = []
+
+                                for filename in os.listdir(get_media_path(device)):
+                                    path = os.path.join(get_media_path(device), filename)
+                                    if os.path.isfile(path):
+                                        files.append(filename)
+
+                                if len(files) <= 0:
+                                    tala.message("Failure", "No files found on drive!")
+                                    logger.info("No files found on " + device + "!")
+                                else:
+                                    files.append("Exit")
+                                    choice = tala.menu([files])
+                                    if choice != "Exit":
+                                        yn = tala.yn("Copy & Overwrite " + choice)
+                                        if yn:
+                                            logger.info("Copying file from " + os.path.join(get_media_path(device), choice) + " to " + os.path.join(REPO_DIR, choice) + "...")
+                                            shutil.move(os.path.join(get_media_path(device), choice), os.path.join(REPO_DIR, choice))
+                                            logger.info("Copy complete!")
+                                            tala.popup("Updated", "Updated file " + choice + "!")
+                                            time.sleep(1)
+                                            restart = tala.yn("Restart")
+                                            if restart:
+                                                tala.popup("Restarting", "Tala will restart in 3 seconds.")
+                                                time.sleep(3)
+                                                subprocess.call(["/etc/init.d/tala.sh", "restart"])
+                            else:
+                                logger.info("Problem mounting drive " + device)
+                                tala.message("Failure", "Problem mounting " + device + "!")
+
             elif choice == "Exit Options":
                 break
     elif choice == "Power Off":
         time.sleep(1)
-        option = tala.yn("Are you sure you'd like to power off?")
+        option = tala.yn("Are you sure you'd like to power off")
         if option:
             logger.info("=== POWERING OFF DEVICE ===")
             tala.popup(body="Device shutting down. Wait up to 10s before removing power.")
