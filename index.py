@@ -11,6 +11,7 @@ import os
 import datetime
 import urllib.request
 import urllib.error
+import sys
 
 conn = None
 c = None
@@ -209,6 +210,8 @@ while True:
                                 os.remove("updatetest")
                             else:
                                 log("update", "There is no `updatetest` file, updating anyway.")
+
+                            tala.popup("Updating...", "Please wait while updating...")
 
                             # This should update tala from github (in theory)
                             call(["git", "fetch", "--all"])
