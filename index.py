@@ -8,9 +8,13 @@ import json
 import time
 from subprocess import call
 import os
+import datetime
 
 conn = None
 c = None
+
+def log(level, content):
+    print("[" + str(datetime.datetime.utcnow()) + "] (Tala) {" + type + "} -> " + content)
 
 def setupDb():
     global conn
@@ -36,11 +40,17 @@ def setupDb():
         data = c.fetchall()
 
         if len(data) <= 0:  # If table doesn't exist
-            print("Creating table " + table["name"])
-            print("CREATE TABLE " + table["name"] + " (" + table["columns"] + ")")
+            log("info", "Creating table " + table["name"] + " with query: CREATE TABLE " + table["name"] + " (" + table["columns"] + ")")
             c.execute("CREATE TABLE " +
                       table["name"] + " (" + table["columns"] + ")")
             conn.commit()
+
+def newUdid():
+    udid = "".join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=6))
+    c.execute("DELETE * FROM `config` WHERE option = 'udid'")
+    c.execute("INSERT INTO `config` (`option`, `value`) VALUES ('udid', ?)", [udid])
+    conn.commit()
+    log("info", "Created new Unique Device ID: " + udid + ".")
 
 setupDb()
 
@@ -56,6 +66,7 @@ def decode(data):
     return(data)
 
 while True:
+    log("info", "Showing main menu")
     choice = tala.menu(["Public Message", "Memo", "Settings", "Power Off"])
     time.sleep(1)
     if choice == "Public Message":
@@ -85,13 +96,15 @@ while True:
                 timestamp = datetime.datetime.now()
 
                 message = {
-                                "content": content,
-                                "id": msg_id,
-                                "timestamp": timestamp,
-                                "sender": "",
-                                "recipient": ""
-                                }
-
+                            "content": content,
+                            "id": msg_id,
+                            "timestamp": timestamp,
+                            "sender": {
+                                name: "Jake Walker",
+                                uid: ""
+                            }
+                        }
+                log("info", "Sending Public Message: " + encode(message))
                 tala.send(encode(message))
                 time.sleep(1)
             elif choice == "Exit":
@@ -101,22 +114,25 @@ while True:
         c.execute("SELECT * FROM memos")
         memos = c.fetchall()
         if len(memos) > 0:
+            log("info", "Showing memo menu.")
             memolist = ["New Memo", "Delete Memo"]
             for memo in memos:
                 memolist.append(memo[0])
             choice = tala.menu(memolist)
             time.sleep(1)
         else:
+            log("info", "No memos created, automatically choosing to create new memo.")
             choice = "New Memo"
         if choice == "New Memo":
-            tala.popup(body="Input memo name")
+            tala.popup(body="Input memo title")
             time.sleep(2)
             memo_name = tala.type()
             time.sleep(1)
-            tala.popup(body="Input memo data")
+            tala.popup(body="Input memo text")
             time.sleep(2)
             memo_data = tala.type()
             time.sleep(1)
+            log("info", "Created new memo with title '" + memo_name + "' and body '" + memo_data + "'")
             c.execute("INSERT INTO memos (memo_name, memo_data) values (?, ?)", [memo_name, memo_data])
             conn.commit()
         elif choice == "Delete Memo":
@@ -152,13 +168,16 @@ while True:
             elif choice == "Clear Data":
                 result = tala.yn("Are you sure")
                 if result:
+                    log("info", "Deleting database...")
                     os.remove("database.db")
-                    tala.popup(body="Database purged!")
+                    tala.popup("Purging...", "Database purged!")
                     time.sleep(2)
-                    tala.popup(body="Recreating Database...")
+                    tala.popup("Purging...", "Recreating Database...")
+                    log("info", "Setting up database...")
                     setupDb()
-                    tala.message("Cleared", "Successfully cleared data.")
+                    tala.message("Purged", "Successfully cleared data.")
                     time.sleep(1)
+                    log("info", "Database purge complete!")
                 elif not result:
                     tala.message("Alert", "No changed made.")
                     time.sleep(1)
@@ -169,7 +188,10 @@ while True:
     elif choice == "Power Off":
         choice = tala.menu(["Power Off", "Don't Power Off"])
         if choice == "Power Off":
-            tala.message("Alert", "Power Off")
-            tala.cleanup()
-            call(["sudo", "halt"])
-            break
+            option = tala.yn("Power Off", "Are you sure you'd like to power off?")
+            if option:
+                log("warn", "=== POWERING OFF DEVICE ===")
+                tala.popup(body="Device shutting down. Wait up to 10s before removing power.")
+                tala.cleanup()
+                call(["sudo", "halt"])
+                break
