@@ -52,7 +52,7 @@ c.execute("SELECT * FROM config WHERE column='pin'")
 
 
 while True:
-	choice = tala.menu(["Public Message", "Snake", "Memo", "Settings", "Power Off"])
+	choice = tala.menu(["Public Message", "Memo", "Settings", "Power Off"])
 	time.sleep(1)
 	if choice == "Public Message":
 		def recv_data(stop_event):
@@ -93,9 +93,6 @@ while True:
 			elif choice == "Exit":
 				t_stop.set() # Kills the thread
 				break
-	elif choice == "Snake":
-		tala.message("Alert", "[game code here]")
-		time.sleep(1)
 	elif choice == "Memo":
 		c.execute("SELECT * FROM memos")
 		memos = c.fetchall()
@@ -131,27 +128,23 @@ while True:
 			time.sleep(1)
 	elif choice == "Settings":
 		while True:
-			choice = tala.menu(["Change Pin", "Reset Device Key", "Exit Options"])
+			choice = tala.menu(["Change Pin", "Reset Device Key", "Update Tala", "Exit Options"])
 			if choice == "Change Pin":
 				pin = tala.type_numbers()
 				time.sleep(1)
 				tala.message("Debug", "Changed PIN to " + str(pin))
 				time.sleep(1)
 			elif choice == "Reset Device Key":
-				tala.message("Warning!", "Are you sure?(0/1)")
-				time.sleep(1)
-				while True:
-					choice = tala.singlebutton()
-					if choice == "1":
-						tala.message("Alert", "Device Key reset")
-						time.sleep(1)
-						#No actual code for this yet
-					elif choice == "0":
-						tala.message("Alert", "Did not reset Device Key")
-						time.sleep(1)
-					else:
-						tala.message("Error", "Invalid input")
-						time.sleep(1)
+				result = tala.yn("Are you sure")
+				if result:
+					tala.message("Alert", "Device Key reset")
+					time.sleep(1)
+					#No actual code for this yet
+				elif not result:
+					tala.message("Alert", "Did not reset Device Key")
+					time.sleep(1)
+			elif choice == "Update Tala":
+				result = 	tala.yn("Are you sure you'd like to update")
 			elif choice == "Exit Options":
 				break
 	elif choice == "Power Off":
