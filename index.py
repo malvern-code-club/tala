@@ -312,8 +312,8 @@ while True:
                             if mount.is_mounted(device):
                                 files = []
 
-                                for filename in os.listdir(get_media_path(device)):
-                                    path = os.path.join(get_media_path(device), filename)
+                                for filename in os.listdir(mount.get_media_path(device)):
+                                    path = os.path.join(mount.get_media_path(device), filename)
                                     if os.path.isfile(path):
                                         files.append(filename)
 
@@ -326,8 +326,8 @@ while True:
                                     if choice != "Exit":
                                         yn = tala.yn("Copy & Overwrite " + choice)
                                         if yn:
-                                            logger.info("Copying file from " + os.path.join(get_media_path(device), choice) + " to " + os.path.join(REPO_DIR, choice) + "...")
-                                            shutil.move(os.path.join(get_media_path(device), choice), os.path.join(REPO_DIR, choice))
+                                            logger.info("Copying file from " + os.path.join(mount.get_media_path(device), choice) + " to " + os.path.join(REPO_DIR, choice) + "...")
+                                            shutil.move(os.path.join(mount.get_media_path(device), choice), os.path.join(REPO_DIR, choice))
                                             logger.info("Copy complete!")
                                             tala.popup("Updated", "Updated file " + choice + "!")
                                             time.sleep(1)
