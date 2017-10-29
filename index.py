@@ -196,9 +196,9 @@ while True:
                         connection = False
                         reason = ""
                         try:
-                            urllib.request.urlopen("http://216.58.192.142", timeout=1)
+                            urllib.urlopen("http://216.58.192.142", timeout=1)
                             connection = True
-                        except urllib.error.URLError as e:
+                        except urllib.URLError as e:
                             reason = e.reason
                             connection = False
 
