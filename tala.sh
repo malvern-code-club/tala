@@ -6,7 +6,7 @@
 # Required-Stop:     $remote_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: A text only portable communication device designed for an apocolypse.
+# Short-Description: Tala
 # Description:       A text only portable communication device designed for an apocolypse.
 ### END INIT INFO
 
