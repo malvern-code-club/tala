@@ -57,7 +57,7 @@ def newUdid():
     log("info", "Created new Unique Device ID: " + udid + ".")
 
 c.execute("SELECT * FROM `config` WHERE `option` = 'pin'")
-if len(c.fetchone()) < 1:
+if c.fetchone() == None:
     newUdid()
 
 tala = talalib.Tala()
