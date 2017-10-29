@@ -103,7 +103,7 @@ while True:
         timestamp = datetime.datetime.now()
 
         c.execute("SELECT * FROM `config` WHERE `option` = 'udid'")
-        udid = c.fetchonce()[0]
+        udid = c.fetchone()[0]
 
         message = {
                     "content": content,
