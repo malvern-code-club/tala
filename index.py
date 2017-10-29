@@ -7,11 +7,18 @@ import datetime
 import json
 import time
 from subprocess import call
+import os
 
-conn = sqlite3.connect("database.db")
-c = conn.cursor()
+conn = None
+c = None
 
 def setupDb():
+    global conn
+    global c
+
+    conn = sqlite3.connect("database.db")
+    c = conn.cursor()
+
     tables = [
         {
             "name": "memos",
@@ -145,7 +152,7 @@ while True:
             elif choice == "Clear Data":
                 result = tala.yn("Are you sure")
                 if result:
-                    c.execute("DROP TABLE *;")
+                    os.remove("database.db")
                     tala.popup(body="Database purged!")
                     time.sleep(2)
                     tala.popup(body="Recreating Database...")
