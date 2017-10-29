@@ -9,6 +9,7 @@ import time
 from subprocess import call
 import os
 import datetime
+import urllib2
 
 conn = None
 c = None
@@ -187,6 +188,40 @@ while True:
                     time.sleep(1)
             elif choice == "Update Tala":
                 result = tala.yn("Are you sure you'd like to update")
+                if result:
+                    tala.message("Information", "Tala will update even if there's no new version. On the next screen select a way to update.")
+                    choice = tala.menu(["Via Internet", "Via USB"])
+                    if choice == "Via Internet":
+                        # Check for connection
+                        connection = False
+                        try:
+                            urllib2.urlopen("http://216.58.192.142", timeout=1)
+                            connection = True
+                        except urllib2.URLError as err:
+                            connection = False
+
+                        if connection:
+                            if os.path.exists("updatetest"):
+                                log("update", "Deleting `updatetest` file")
+                                os.remove("updatetest")
+                            else:
+                                log("update", "There is no `updatetest` file, updating anyway.")
+
+                            # This should update tala from github (in theory)
+                            call(["git", "pull"])
+
+                            if os.path.exists("updatetest"):
+                                log("update", "`updatetest` file exists. Update successful.")
+                                tala.popup("Updated", "Update was successful! Tala will now restart.")
+                                os.execl(sys.executable, sys.executable, *sys.argv)
+                                break
+                            else:
+                                log("update", "`updatetest` file doesn't exist. Update unsuccessful.")
+                                tala.message("Update", "Update was unsuccessful. You could try updating via USB.")
+                        else:
+                            tala.message("Error", "Failed to update: You are not connected to the internet!")
+                    elif choice == "Via USB":
+                        log("update", "Not implemented")
             elif choice == "Exit Options":
                 break
     elif choice == "Power Off":
