@@ -51,7 +51,7 @@ setupDb()
 
 def newUdid():
     udid = "".join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6))
-    c.execute("DELETE * FROM `config` WHERE option = 'udid'")
+    c.execute("DELETE FROM `config` WHERE option = 'udid'")
     c.execute("INSERT INTO `config` (`option`, `value`) VALUES ('udid', ?)", [udid])
     conn.commit()
     log("info", "Created new Unique Device ID: " + udid + ".")
