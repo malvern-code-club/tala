@@ -9,7 +9,8 @@ import time
 from subprocess import call
 import os
 import datetime
-import urllib
+import urllib.request
+import urllib.error
 
 conn = None
 c = None
@@ -196,9 +197,9 @@ while True:
                         connection = False
                         reason = ""
                         try:
-                            urllib.urlopen("http://216.58.192.142", timeout=1)
+                            urllib.request.urlopen("http://216.58.192.142", timeout=1)
                             connection = True
-                        except urllib.URLError as e:
+                        except urllib.error.URLError as e:
                             reason = e.reason
                             connection = False
 
