@@ -24,7 +24,8 @@ STORAGE_DIR = "/opt/"
 
 os.chdir(REPO_DIR)
 
-LOG_FILENAME = STORAGE_DIR + "tala.log"
+LOG_NAME = "tala.log"
+LOG_FILENAME = STORAGE_DIR + LOG_NAME
 LOG_LEVEL = logging.INFO
 
 DB_FILENAME = STORAGE_DIR + "tala.db"
@@ -205,7 +206,7 @@ while True:
             time.sleep(1)
     elif choice == "Settings":
         while True:
-            choice = tala.menu(["Change Name", "Reset Device ID", "Clear Data", "Update Tala", "Exit Options"])
+            choice = tala.menu(["Change Name", "Reset Device ID", "Clear Data", "Update Tala", "Save Log to USB", "Exit Options"])
             if choice == "Reset Device ID":
                 time.sleep(1)
                 result = tala.yn("Are you sure")
@@ -245,6 +246,50 @@ while True:
                 elif not result:
                     tala.message("Alert", "No changed made.")
                     time.sleep(1)
+            elif choice == "Save Log to USB":
+                time.sleep(1)
+                result = tala.yn("Save log to usb")
+                if result:
+                    tala.message("Update", "Please PLUG IN your USB drive to save log to then press the checkmark to continue.")
+
+                    devices = mount.list_media_devices()
+
+                    logger.info(str(len(devices)) + " device(s) found.")
+
+                    device = None
+
+                    if len(devices) <= 0:
+                        tala.message("Failure", "Couldn't detect any USB drives.")
+                    elif len(devices) == 1:
+                        tala.popup("Update", "Only 1 drive found, using that one.")
+                        time.sleep(2)
+                        device = devices[0]
+                    else:
+                        tala.popup(body="Select a drive to save to")
+                        time.sleep(2)
+                        tala.menu(devices)
+
+                    if device != None:
+                        logger.info("Using device " + device)
+
+                        mount.mount(device)
+
+                        if mount.is_mounted(device):
+                            files = []
+
+                            for filename in os.listdir(mount.get_media_path(device)):
+                                path = os.path.join(mount.get_media_path(device), filename)
+                                if os.path.isfile(path):
+                                    files.append(filename)
+                            
+                            tala.popup("Copying...", "Copying log file...")
+                            logger.info("Copying file from " + LOG_FILENAME + " to " + os.path.join(mount.get_media_path(device), LOG_NAME) + "...")
+                            shutil.copy(LOG_FILENAME, os.path.join(mount.get_media_path(device), LOG_NAME))
+                            logger.info("Copy complete!")
+                            tala.popup("Copyied", "Copy complete!")
+                            time.sleep(2)
+                            
+                        mount.unmount(device)
             elif choice == "Update Tala":
                 time.sleep(1)
                 result = tala.yn("Are you sure you'd like to update")
@@ -341,7 +386,7 @@ while True:
                                     if choice != "Exit":
                                         yn = tala.yn("Copy & Overwrite " + choice)
                                         if yn:
-                                            logger.info("Copying file from " + os.path.join(mount.get_media_path(device), choice) + " to " + os.path.join(REPO_DIR, choice) + "...")
+                                            logger.info("Copying file from " + LOG_FILENAME + " to " + os.path.join(mount.get_media_path(device), choice) + "...")
                                             shutil.move(os.path.join(mount.get_media_path(device), choice), os.path.join(REPO_DIR, choice))
                                             logger.info("Copy complete!")
                                             tala.popup("Updated", "Updated file " + choice + "!")
