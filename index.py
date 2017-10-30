@@ -342,7 +342,7 @@ while True:
                                         yn = tala.yn("Copy & Overwrite " + choice)
                                         if yn:
                                             logger.info("Copying file from " + os.path.join(mount.get_media_path(device), choice) + " to " + os.path.join(REPO_DIR, choice) + "...")
-                                            shutil.move(os.path.join(mount.get_media_path(device), choice), os.path.join(REPO_DIR, choice))
+                                            shutil.copy(os.path.join(mount.get_media_path(device), choice), os.path.join(REPO_DIR, choice))
                                             logger.info("Copy complete!")
                                             tala.popup("Updated", "Updated file " + choice + "!")
                                             time.sleep(1)
