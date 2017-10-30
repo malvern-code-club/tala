@@ -126,8 +126,8 @@ def recv_data():
             else:
                 tala.message("Message", data)
 
-        thread_recv_data = threading.Thread(target=recv_data)
-        thread_recv_data.start()
+thread_recv_data = threading.Thread(target=recv_data)
+thread_recv_data.start()
 
 while True:
     logger.info("Showing main menu")
