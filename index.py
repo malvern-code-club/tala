@@ -10,7 +10,6 @@ import json
 import time
 import subprocess
 import os
-import datetime
 import urllib.request
 import urllib.error
 import sys
@@ -37,6 +36,7 @@ formatter = logging.Formatter("%(asctime)s %(levelname)-8s %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+
 class TalaLogger(object):
     def __init__(self, logger, level):
         self.logger = logger
@@ -46,6 +46,7 @@ class TalaLogger(object):
         if message.rstrip() != "":
             self.logger.log(self.level, message.rstrip())
 
+
 sys.stdout = TalaLogger(logger, logging.INFO)
 sys.stderr = TalaLogger(logger, logging.ERROR)
 
@@ -53,6 +54,7 @@ conn = None
 c = None
 
 logger.info("=== STARTED TALA ===")
+
 
 def setupDb():
     global conn
@@ -83,10 +85,13 @@ def setupDb():
                       table["name"] + " (" + table["columns"] + ")")
             conn.commit()
 
+
 setupDb()
+
 
 def generateId():
     return "".join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6))
+
 
 def newUdid():
     udid = generateId()
@@ -95,8 +100,9 @@ def newUdid():
     conn.commit()
     logger.info("Created new Unique Device ID: " + udid + ".")
 
+
 c.execute("SELECT * FROM `config` WHERE `option` = 'udid'")
-if c.fetchone() == None:
+if c.fetchone() is None:
     newUdid()
 
 tala = talalib.Tala()
@@ -104,19 +110,23 @@ tala = talalib.Tala()
 tala.clear()
 
 c.execute("SELECT * FROM `config` WHERE `option` = 'name'")
-if c.fetchone() == None:
+if c.fetchone() is None:
     tala.message("First Run", "You don't have a name set! Why don't you introduce yourself? Press the checkmark button and then use the keys to type your name.")
     time.sleep(1)
     name = tala.type()
     c.execute("INSERT INTO `config` (`option`, `value`) VALUES ('name', ?)", [name])
     conn.commit()
 
+
 def encode(data):
-    data = json.dumps(data) #Json dump message
+    data = json.dumps(data)  # Json dump message
     return(data)
+
+
 def decode(data):
-    data = json.loads(data) #Load from json
+    data = json.loads(data)  # Load from json
     return(data)
+
 
 def recv_data():
         while True:
@@ -126,6 +136,7 @@ def recv_data():
                 pass
             else:
                 tala.message("Message", data)
+
 
 thread_recv_data = threading.Thread(target=recv_data)
 thread_recv_data.start()
@@ -149,14 +160,14 @@ while True:
         name = c.fetchone()[0]
 
         message = {
-                    "content": content,
-                    "id": msg_id,
-                    "timestamp": timestamp,
-                    "sender": {
-                        "name": name,
-                        "udid": udid
-                    }
-                }
+            "content": content,
+            "id": msg_id,
+            "timestamp": timestamp,
+            "sender": {
+                "name": name,
+                "udid": udid
+            }
+        }
 
         logger.info("Sending Public Message: " + encode(message))
 
@@ -265,7 +276,7 @@ while True:
                         time.sleep(2)
                         tala.menu(devices)
 
-                    if device != None:
+                    if device is not None:
                         logger.info("Using device " + device)
 
                         mount.mount(device)
@@ -277,14 +288,14 @@ while True:
                                 path = os.path.join(mount.get_media_path(device), filename)
                                 if os.path.isfile(path):
                                     files.append(filename)
-                            
+
                             tala.popup("Copying...", "Copying log file...")
                             logger.info("Copying file from " + LOG_FILENAME + " to " + os.path.join(mount.get_media_path(device), LOG_NAME) + "...")
                             shutil.copy(LOG_FILENAME, os.path.join(mount.get_media_path(device), LOG_NAME))
                             logger.info("Copy complete!")
                             tala.popup("Copyied", "Copy complete!")
                             time.sleep(2)
-                            
+
                         mount.unmount(device)
             elif choice == "Update Tala":
                 time.sleep(1)
