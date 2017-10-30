@@ -110,13 +110,6 @@ if c.fetchone() == None:
     c.execute("INSERT INTO `config` (`option`, `value`) VALUES ('name', ?)", [name])
     conn.commit()
 
-def encode(data):
-    data = json.dumps(data) #Json dump message
-    return(data)
-def decode(data):
-    data = json.loads(data) #Load from json
-    return(data)
-
 while True:
     logger.info("Showing main menu")
     choice = tala.menu(["Public Message", "Memo", "Settings", "Power Off"])
