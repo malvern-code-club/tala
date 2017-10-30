@@ -117,27 +117,23 @@ def decode(data):
     data = json.loads(data) #Load from json
     return(data)
 
+def recv_data():
+        while True:
+            data = tala.receive()
+            time.sleep(0.5)
+            if data == "":
+                pass
+            else:
+                tala.message("Message", data)
+
+thread_recv_data = threading.Thread(target=recv_data)
+thread_recv_data.start()
+
 while True:
     logger.info("Showing main menu")
     choice = tala.menu(["Public Message", "Memo", "Settings", "Power Off"])
     time.sleep(1)
     if choice == "Public Message":
-        ## ![QUANTUMBLACK] TODO: Make the below threading code run forever while Tala is running
-
-        #def recv_data(stop_event):
-        #    while (not stop_event.is_set()):
-        #        data = tala.receive()
-        #        time.sleep(1)
-        #        if data == "":
-        #            pass
-        #        else:
-        #            tala.message("Message", data)
-
-        #t_stop = threading.Event()
-        #thread_recv_data = threading.Thread(target=recv_data, args=t_stop)
-        #thread_recv_data.start()
-
-        ## ![QUANTUMBLACK] /TODO
 
         content = tala.type()
 
