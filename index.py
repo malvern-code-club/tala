@@ -124,18 +124,23 @@ def encode(data):
 
 
 def decode(data):
-    data = json.loads(data)  # Load from json
-    return(data)
+    try:
+        data = json.loads(data)  # Load from json
+    except json.decoder.JSONDecoderError:
+        logger.error("Invalid JSON inputted to decode function: " + data)
+        data = None
+    return data
 
 
 def recv_data():
         while True:
-            data = tala.receive()
-            time.sleep(0.5)
-            if data == "":
-                pass
-            else:
-                tala.message("Message", data)
+            msg = tala.receive()
+            if not msg == "":
+                msg = decode(msg)
+                if msg is not None:
+                    tala.message("Message", "MESSAGE: " + msg["content"] +
+                                 " | SENT: " + msg["timestamp"] +
+                                 " | FROM: " + msg["sender"]["name"])
 
 
 thread_recv_data = threading.Thread(target=recv_data)
