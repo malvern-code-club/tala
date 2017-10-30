@@ -31,13 +31,38 @@ tala.menu(["Item 1", "Item 2", "Item 3"])
 This shows a message to the user. The first parameter of the function is the
 title of the message as a string and the second parameter is the body of the message,
 if the body is too long to fit on screen, the user can scroll using the up and
-down keys.
+down keys. **The user needs to manually dismiss a message!**
 
 ```python
 tala.message("Example", "This is an example popup!")
 ```
 
 Input a title then a body.
+
+### `popup(title[String], body[String])` *[Screen]*
+
+This is similar to the above `message` method, but **does not require user input to
+be dismissed** (*the screen needs to be cleared to remove it*). The title parameter
+is optional but body is required. **After calling this function, you might want
+`tala.singlebutton()` to get user input.**
+
+```python
+tala.popup("Popup", "You have mail!")
+```
+
+```python
+tala.popup(body="You have mail!")
+```
+
+### `yn(question[String])` *[Screen, Keypad]*
+
+This uses the above `popup` method and combines it with `singlebutton` to ask the
+user a yes/no question. The question parameter is required and needs to be a
+string.
+
+```python
+tala.yn("Do you like ice cream")
+```
 
 ### `singlebutton()` *[Keypad]*
 

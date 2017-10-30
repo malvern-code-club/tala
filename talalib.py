@@ -12,6 +12,9 @@ import textwrap
 
 import RPi.GPIO as GPIO
 
+_FONT_LECO_PATH = "/opt/tala/leco1976.ttf"
+_FONT_FREEPIXEL_PATH = "/opt/tala/FreePixel.ttf"
+
 class Tala():
     def __init__(self):
         # Setup Display
@@ -162,8 +165,8 @@ class Tala():
         draw = ImageDraw.Draw(image)
 
         # Define the fonts
-        bigfont = ImageFont.truetype("leco1976.ttf", 45)
-        font = ImageFont.truetype("FreePixel.ttf", 14)
+        bigfont = ImageFont.truetype(_FONT_LECO_PATH, 45)
+        font = ImageFont.truetype(_FONT_FREEPIXEL_PATH, 14)
 
         # Define the characters to cycle for each key on the keypad
         # Special:
@@ -301,6 +304,60 @@ class Tala():
         # ie turn off pins, etc..
         GPIO.cleanup()
 
+    def yn(self, question):
+        self.popup(body=question + "?")
+
+        while True:
+            # check for button presses
+            btn = self.singlebutton()
+            # if button * is pressed return yes
+            if btn == "#":
+                return True
+            # if # button is pressed return no
+            elif btn == "*":
+                return False
+
+    def popup(self, title="", body=""):
+        # make the message wrap (aka if it goes off the screen make it start on
+        # a new line)
+        wrapbody = textwrap.wrap(body, width=17)
+
+        # make a new image
+        image = Image.new("1", (self.width, self.height))
+        draw = ImageDraw.Draw(image)
+
+        # define the fonts
+        titlefont = ImageFont.truetype(_FONT_LECO_PATH, 15)
+        font = ImageFont.truetype(_FONT_FREEPIXEL_PATH, 11)
+
+        # clear the canvas
+        draw.rectangle((0, 0, self.width, self.height), outline=0, fill=0)
+
+        padding = 5
+
+        if title != "":
+            # get width and height of title
+            titlewidth, titleheight = draw.textsize(title, font=titlefont)
+            # draw a box to put the title in
+            draw.rectangle((0, 0, self.width, titleheight+10), outline=255, fill=255)
+            # draw the title text
+            draw.text((0+padding, 0+padding), title, font=titlefont, fill=0)
+        else:
+            titlewidth = 0
+            titleheight = 0
+
+        # get line width and height
+        linewidth, lineheight = draw.textsize("test", font=font)
+        lines = 0
+        # draw each line on the screen
+        for i in range(0, len(wrapbody)):
+            draw.text((0+padding, 0+((padding+padding) if title != "" else 0)+titleheight+padding+((lineheight+2)*lines)), wrapbody[i], font=font, fill=255)
+            lines += 1
+
+        # draw the canvas to the screen
+        self.display.image(image)
+        self.display.display()
+
     def message(self, title, body):
         # make the message wrap (aka if it goes off the screen make it start on
         # a new line)
@@ -311,8 +368,8 @@ class Tala():
         draw = ImageDraw.Draw(image)
 
         # define the fonts
-        titlefont = ImageFont.truetype("leco1976.ttf", 15)
-        font = ImageFont.truetype("FreePixel.ttf", 11)
+        titlefont = ImageFont.truetype(_FONT_LECO_PATH, 15)
+        font = ImageFont.truetype(_FONT_FREEPIXEL_PATH, 11)
 
         startline = 0
 
@@ -350,8 +407,8 @@ class Tala():
             elif btn == "8":
                 if startline < (len(wrapbody)-1):
                     startline = startline + 1
-            # if button 5 is pressed dismiss the message
-            elif btn == "5":
+            # if # button is pressed dismiss the message
+            elif btn == "#":
                 return
 
     def menu(self, items):
@@ -366,7 +423,7 @@ class Tala():
         draw.rectangle((0, 0, self.width, self.height), outline=0, fill=0)
 
         # define font
-        font = ImageFont.truetype("leco1976.ttf", 15)
+        font = ImageFont.truetype(_FONT_LECO_PATH, 15)
 
         selected = 0
 
@@ -396,7 +453,7 @@ class Tala():
             elif btn == "8":
                 if selected < (len(items)-1):
                     selected = selected + 1
-            elif btn == "5":
+            elif btn == "#":
                 return items[selected]
 
 
