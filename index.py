@@ -94,6 +94,18 @@ def newUdid():
     conn.commit()
     logger.info("Created new Unique Device ID: " + udid + ".")
 
+def encode(data):
+    data = json.dumps(data) #Json dump message
+    return(data)
+def decode(data):
+    data = json.loads(data) #Load from json
+    return(data)
+
+def restart():
+     tala.popup("Updated", "Update was successful! Tala will now restart in 3 seconds...")
+     time.sleep(3)
+     tala.clear()
+
 c.execute("SELECT * FROM `config` WHERE `option` = 'udid'")
 if c.fetchone() == None:
     newUdid()
@@ -105,22 +117,23 @@ tala.clear()
 c.execute("SELECT * FROM `config` WHERE `option` = 'name'")
 if c.fetchone() == None:
     tala.message("First Run", "You don't have a name set! Why don't you introduce yourself? Press the checkmark button and then use the keys to type your name.")
-    time.sleep(1)
+    time.sleep(0.5)
     name = tala.type()
     c.execute("INSERT INTO `config` (`option`, `value`) VALUES ('name', ?)", [name])
     conn.commit()
 
+
 while True:
     logger.info("Showing main menu")
     choice = tala.menu(["Public Message", "Memo", "Settings", "Power Off"])
-    time.sleep(1)
+    time.sleep(0.5)
     if choice == "Public Message":
         ## ![QUANTUMBLACK] TODO: Make the below threading code run forever while Tala is running
 
         #def recv_data(stop_event):
         #    while (not stop_event.is_set()):
         #        data = tala.receive()
-        #        time.sleep(1)
+        #        time.sleep(0.5)
         #        if data == "":
         #            pass
         #        else:
@@ -157,7 +170,7 @@ while True:
         logger.info("Sending Public Message: " + encode(message))
 
         tala.send(encode(message))
-        time.sleep(1)
+        time.sleep(0.5)
     elif choice == "Memo":
         c.execute("SELECT * FROM memos")
         memos = c.fetchall()
@@ -167,7 +180,7 @@ while True:
             for memo in memos:
                 memolist.append(memo[0])
             choice = tala.menu(memolist)
-            time.sleep(1)
+            time.sleep(0.5)
         else:
             logger.info("No memos created, automatically choosing to create new memo.")
             choice = "New Memo"
@@ -175,17 +188,17 @@ while True:
             tala.popup(body="Input memo title")
             time.sleep(2)
             memo_name = tala.type()
-            time.sleep(1)
+            time.sleep(0.5)
             tala.popup(body="Input memo text")
             time.sleep(2)
             memo_data = tala.type()
-            time.sleep(1)
+            time.sleep(0.5)
             logger.info("Created new memo with title '" + memo_name + "' and body '" + memo_data + "'")
             c.execute("INSERT INTO memos (memo_name, memo_data) values (?, ?)", [memo_name, memo_data])
             conn.commit()
         elif choice == "Delete Memo":
             choice = tala.menu(memos)
-            time.sleep(1)
+            time.sleep(0.5)
             if choice == "empty":
                 pass
             else:
@@ -195,34 +208,34 @@ while True:
             c.execute("SELECT memo_data FROM memos WHERE memo_name = ?", [choice])
             memo_data = c.fetchone()
             tala.message(choice, memo_data[0])
-            time.sleep(1)
+            time.sleep(0.5)
     elif choice == "Settings":
         while True:
             choice = tala.menu(["Change Name", "Reset Device ID", "Clear Data", "Update Tala", "Exit Options"])
             if choice == "Reset Device ID":
-                time.sleep(1)
+                time.sleep(0.5)
                 result = tala.yn("Are you sure")
                 if result:
                     newUdid()
                     tala.message("Reset UDID", "Device ID regenerated!")
-                    time.sleep(1)
+                    time.sleep(0.5)
                 elif not result:
                     tala.message("Reset UDID", "No changes made.")
-                    time.sleep(1)
+                    time.sleep(0.5)
             elif choice == "Change Name":
-                time.sleep(1)
+                time.sleep(0.5)
                 c.execute("SELECT `value` FROM `config` WHERE `option` = 'name'")
                 name = c.fetchone()[0]
                 result = tala.yn("Current name is " + name + ". Change")
                 if result:
                     tala.popup(body="Please type new name")
-                    time.sleep(1)
+                    time.sleep(0.5)
                     newname = tala.type()
                     c.execute("UPDATE `config` SET `value` = ? WHERE `option` = 'name'", [newname])
                     conn.commit()
                     tala.message("Changed", "Your name has been changed from " + name + " to " + newname + "!")
             elif choice == "Clear Data":
-                time.sleep(1)
+                time.sleep(0.5)
                 result = tala.yn("Are you sure")
                 if result:
                     logger.info("Deleting database...")
@@ -233,13 +246,13 @@ while True:
                     logger.info("Setting up database...")
                     setupDb()
                     tala.message("Purged", "Successfully cleared data.")
-                    time.sleep(1)
+                    time.sleep(0.5)
                     logger.info("Database purge complete!")
                 elif not result:
                     tala.message("Alert", "No changed made.")
-                    time.sleep(1)
+                    time.sleep(0.5)
             elif choice == "Update Tala":
-                time.sleep(1)
+                time.sleep(0.5)
                 result = tala.yn("Are you sure you'd like to update")
                 if result:
                     tala.message("Information", "Tala will update even if there's no new version. On the next screen select a way to update.")
@@ -282,9 +295,7 @@ while True:
                                 subprocess.call(["cp", REPO_DIR + "tala.sh", "/etc/init.d"])
                                 subprocess.call(["chmod", "755", "/etc/init.d/tala.sh"])
 
-                                tala.popup("Updated", "Update was successful! Tala will now restart in 3 seconds...")
-                                time.sleep(3)
-                                subprocess.call(["/etc/init.d/tala.sh", "restart"])
+                                restart()
                                 break
                             else:
                                 logger.info("`updatetest` file doesn't exist. Update unsuccessful.")
@@ -335,15 +346,13 @@ while True:
                                         yn = tala.yn("Copy & Overwrite " + choice)
                                         if yn:
                                             logger.info("Copying file from " + os.path.join(mount.get_media_path(device), choice) + " to " + os.path.join(REPO_DIR, choice) + "...")
-                                            shutil.move(os.path.join(mount.get_media_path(device), choice), os.path.join(REPO_DIR, choice))
+                                            shutil.copy(os.path.join(mount.get_media_path(device), choice), os.path.join(REPO_DIR, choice))
                                             logger.info("Copy complete!")
                                             tala.popup("Updated", "Updated file " + choice + "!")
-                                            time.sleep(1)
+                                            time.sleep(0.5)
                                             restart = tala.yn("Restart")
                                             if restart:
-                                                tala.popup("Restarting", "Tala will restart in 3 seconds.")
-                                                time.sleep(3)
-                                                subprocess.call(["/etc/init.d/tala.sh", "restart"])
+                                                restart()
                             else:
                                 logger.info("Problem mounting drive " + device)
                                 tala.message("Failure", "Problem mounting " + device + "!")
@@ -351,7 +360,7 @@ while True:
             elif choice == "Exit Options":
                 break
     elif choice == "Power Off":
-        time.sleep(1)
+        time.sleep(0.5)
         option = tala.yn("Are you sure you'd like to power off")
         if option:
             logger.info("=== POWERING OFF DEVICE ===")
