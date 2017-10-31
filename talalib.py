@@ -168,7 +168,7 @@ class Tala():
             time.sleep(wait)
         return message
 
-    def type(self, wait=0.5, interrupt_bypass):
+    def type(self, wait=0.5, interrupt_bypass=False):
         # Make a new image/canvas with the width and height of the screen.
         image = Image.new("1", (self.width, self.height))
         # Make a new draw variable which draws shapes/text to the screen.
