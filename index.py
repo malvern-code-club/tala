@@ -142,7 +142,8 @@ def recv_data():
                     tala.interrupt = True
                     tala.message("Message", "MESSAGE: " + msg["content"] +
                                  " | SENT: " + msg["timestamp"] +
-                                 " | FROM: " + msg["sender"]["name"])
+                                 " | FROM: " + msg["sender"]["name"],
+                                 interrupt_bypass=True)
                     tala.interrupt = False
 
 
