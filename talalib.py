@@ -117,6 +117,7 @@ class Tala():
                 key = "#"
 
             if self.interrupt and not interrupt_bypass:
+                print("Interrupting singlebutton(). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
                 return None
 
             time.sleep(wait)
@@ -163,6 +164,7 @@ class Tala():
             message = message + key
 
             if self.interrupt and not interrupt_bypass:
+                print("Interrupting type_numbers(). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
                 return None
 
             time.sleep(wait)
@@ -243,6 +245,7 @@ class Tala():
                 doloop = False
 
             if self.interrupt and not interrupt_bypass:
+                print("Interrupting type(). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
                 return None
 
             if key != "":
@@ -273,6 +276,7 @@ class Tala():
 
                 # Display the canvas on the screen.
                 if self.interrupt and not interrupt_bypass:
+                    print("Interrupting type() (SCREEN DRAW). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
                     return None
                 else:
                     self.display.image(image)
@@ -310,6 +314,7 @@ class Tala():
 
                 # display the canvas to the screen
                 if self.interrupt and not interrupt_bypass:
+                    print("Interrupting type() (SCREEN DRAW). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
                     return None
                 else:
                     self.display.image(image)
@@ -381,6 +386,7 @@ class Tala():
         else:
             # draw the canvas to the screen
             if self.interrupt and not interrupt_bypass:
+                print("Interrupting popup(). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
                 return None
             else:
                 self.display.image(image)
@@ -422,6 +428,7 @@ class Tala():
                 lines += 1
 
             if self.interrupt and not interrupt_bypass:
+                print("Interrupting message() (SCREEN DRAW). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
                 return None
             else:
                 # draw the canvas to the screen
@@ -477,6 +484,7 @@ class Tala():
                 self.draw_rectangle(draw, 0, 48, 80, 0, 0, 255, selected, items, 1, font)
 
             if self.interrupt and not interrupt_bypass:
+                print("Interrupting menu() (SCREEN DRAW). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
                 return None
             else:
                 self.display.image(image)
@@ -503,6 +511,7 @@ class Tala():
 
     def clear(self, interrupt_bypass=False):
         if self.interrupt and not interrupt_bypass:
+            print("Interrupting clear() (SCREEN DRAW). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
             return None
         else:
             self.display.clear()
