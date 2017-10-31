@@ -31,7 +31,7 @@ DB_FILENAME = STORAGE_DIR + "tala.db"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(LOG_LEVEL)
-handler = logging.handlers.FileHandler(LOG_FILENAME)
+handler = logging.FileHandler(LOG_FILENAME)
 formatter = logging.Formatter("%(asctime)s %(levelname)-8s %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
