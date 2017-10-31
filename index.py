@@ -31,7 +31,7 @@ DB_FILENAME = STORAGE_DIR + "tala.db"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(LOG_LEVEL)
-handler = logging.handlers.TimedRotatingFileHandler(LOG_FILENAME, when="midnight", backupCount=2)
+handler = logging.handlers.FileHandler(LOG_FILENAME)
 formatter = logging.Formatter("%(asctime)s %(levelname)-8s %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
@@ -114,8 +114,9 @@ if c.fetchone() is None:
     tala.message("First Run", "You don't have a name set! Why don't you introduce yourself? Press the checkmark button and then use the keys to type your name.")
     time.sleep(1)
     name = tala.type()
-    c.execute("INSERT INTO `config` (`option`, `value`) VALUES ('name', ?)", [name])
-    conn.commit()
+    if name is not None:
+        c.execute("INSERT INTO `config` (`option`, `value`) VALUES ('name', ?)", [name])
+        conn.commit()
 
 
 def encode(data):
@@ -138,9 +139,11 @@ def recv_data():
             if not msg == "":
                 msg = decode(msg)
                 if msg is not None:
+                    tala.interrupt = True
                     tala.message("Message", "MESSAGE: " + msg["content"] +
                                  " | SENT: " + msg["timestamp"] +
                                  " | FROM: " + msg["sender"]["name"])
+                    tala.interrupt = False
 
 
 thread_recv_data = threading.Thread(target=recv_data)
@@ -154,30 +157,31 @@ while True:
 
         content = tala.type()
 
-        msg_id = generateId()
+        if content is not None:
+            msg_id = generateId()
 
-        timestamp = str(datetime.datetime.utcnow())
+            timestamp = str(datetime.datetime.utcnow())
 
-        c.execute("SELECT `value` FROM `config` WHERE `option` = 'udid'")
-        udid = c.fetchone()[0]
+            c.execute("SELECT `value` FROM `config` WHERE `option` = 'udid'")
+            udid = c.fetchone()[0]
 
-        c.execute("SELECT `value` FROM `config` WHERE `option` = 'name'")
-        name = c.fetchone()[0]
+            c.execute("SELECT `value` FROM `config` WHERE `option` = 'name'")
+            name = c.fetchone()[0]
 
-        message = {
-            "content": content,
-            "id": msg_id,
-            "timestamp": timestamp,
-            "sender": {
-                "name": name,
-                "udid": udid
+            message = {
+                "content": content,
+                "id": msg_id,
+                "timestamp": timestamp,
+                "sender": {
+                    "name": name,
+                    "udid": udid
+                }
             }
-        }
 
-        logger.info("Sending Public Message: " + encode(message))
+            logger.info("Sending Public Message: " + encode(message))
 
-        tala.send(encode(message))
-        time.sleep(1)
+            tala.send(encode(message))
+            time.sleep(1)
     elif choice == "Memo":
         c.execute("SELECT * FROM memos")
         memos = c.fetchall()
@@ -191,6 +195,7 @@ while True:
         else:
             logger.info("No memos created, automatically choosing to create new memo.")
             choice = "New Memo"
+
         if choice == "New Memo":
             tala.popup(body="Input memo title")
             time.sleep(2)
@@ -207,6 +212,8 @@ while True:
             choice = tala.menu(memos)
             time.sleep(1)
             if choice == "empty":
+                pass
+            elif choice is None:
                 pass
             else:
                 c.execute("DELETE FROM memos WHERE memo_name = ?", [choice])
@@ -226,6 +233,8 @@ while True:
                     newUdid()
                     tala.message("Reset UDID", "Device ID regenerated!")
                     time.sleep(1)
+                elif result is None:
+                    pass
                 elif not result:
                     tala.message("Reset UDID", "No changes made.")
                     time.sleep(1)
@@ -238,74 +247,79 @@ while True:
                     tala.popup(body="Please type new name")
                     time.sleep(1)
                     newname = tala.type()
-                    c.execute("UPDATE `config` SET `value` = ? WHERE `option` = 'name'", [newname])
-                    conn.commit()
-                    tala.message("Changed", "Your name has been changed from " + name + " to " + newname + "!")
+                    if newname is not None:
+                        c.execute("UPDATE `config` SET `value` = ? WHERE `option` = 'name'", [newname])
+                        conn.commit()
+                        tala.message("Changed", "Your name has been changed from " + name + " to " + newname + "!")
             elif choice == "Clear Data":
                 time.sleep(1)
                 result = tala.yn("Are you sure")
-                if result:
-                    logger.info("Deleting database...")
-                    os.remove(DB_FILENAME)
-                    tala.popup("Purging...", "Database purged!")
-                    time.sleep(2)
-                    tala.popup("Purging...", "Recreating Database...")
-                    logger.info("Setting up database...")
-                    setupDb()
-                    tala.message("Purged", "Successfully cleared data.")
-                    time.sleep(1)
-                    logger.info("Database purge complete!")
-                elif not result:
-                    tala.message("Alert", "No changed made.")
-                    time.sleep(1)
+                if result is not None:
+                    if result:
+                        logger.info("Deleting database...")
+                        os.remove(DB_FILENAME)
+                        tala.popup("Purging...", "Database purged!")
+                        time.sleep(2)
+                        tala.popup("Purging...", "Recreating Database...")
+                        logger.info("Setting up database...")
+                        setupDb()
+                        tala.message("Purged", "Successfully cleared data.")
+                        time.sleep(1)
+                        logger.info("Database purge complete!")
+                    elif not result:
+                        tala.message("Alert", "No changed made.")
+                        time.sleep(1)
             elif choice == "Save Log to USB":
                 time.sleep(1)
                 result = tala.yn("Save log to usb")
-                if result:
-                    tala.message("Update", "Please PLUG IN your USB drive to save log to then press the checkmark to continue.")
+                if result is not None:
+                    if result:
+                        tala.message("Update", "Please PLUG IN your USB drive to save log to then press the checkmark to continue.")
 
-                    devices = mount.list_media_devices()
+                        devices = mount.list_media_devices()
 
-                    logger.info(str(len(devices)) + " device(s) found.")
+                        logger.info(str(len(devices)) + " device(s) found.")
 
-                    device = None
+                        device = None
 
-                    if len(devices) <= 0:
-                        tala.message("Failure", "Couldn't detect any USB drives.")
-                    elif len(devices) == 1:
-                        tala.popup("Update", "Only 1 drive found, using that one.")
-                        time.sleep(2)
-                        device = devices[0]
-                    else:
-                        tala.popup(body="Select a drive to save to")
-                        time.sleep(2)
-                        tala.menu(devices)
-
-                    if device is not None:
-                        logger.info("Using device " + device)
-
-                        mount.mount(device)
-
-                        if mount.is_mounted(device):
-                            files = []
-
-                            for filename in os.listdir(mount.get_media_path(device)):
-                                path = os.path.join(mount.get_media_path(device), filename)
-                                if os.path.isfile(path):
-                                    files.append(filename)
-
-                            tala.popup("Copying...", "Copying log file...")
-                            logger.info("Copying file from " + LOG_FILENAME + " to " + os.path.join(mount.get_media_path(device), LOG_NAME) + "...")
-                            shutil.copy(LOG_FILENAME, os.path.join(mount.get_media_path(device), LOG_NAME))
-                            logger.info("Copy complete!")
-                            tala.popup("Copyied", "Copy complete!")
+                        if len(devices) <= 0:
+                            tala.message("Failure", "Couldn't detect any USB drives.")
+                        elif len(devices) == 1:
+                            tala.popup("Update", "Only 1 drive found, using that one.")
                             time.sleep(2)
+                            device = devices[0]
+                        else:
+                            tala.popup(body="Select a drive to save to")
+                            time.sleep(2)
+                            tala.menu(devices)
 
-                        mount.unmount(device)
+                        if device is not None:
+                            logger.info("Using device " + device)
+
+                            mount.mount(device)
+
+                            if mount.is_mounted(device):
+                                files = []
+
+                                for filename in os.listdir(mount.get_media_path(device)):
+                                    path = os.path.join(mount.get_media_path(device), filename)
+                                    if os.path.isfile(path):
+                                        files.append(filename)
+
+                                tala.popup("Copying...", "Copying log file...")
+                                logger.info("Copying file from " + LOG_FILENAME + " to " + os.path.join(mount.get_media_path(device), LOG_NAME) + "...")
+                                shutil.copy(LOG_FILENAME, os.path.join(mount.get_media_path(device), LOG_NAME))
+                                logger.info("Copy complete!")
+                                tala.popup("Copyied", "Copy complete!")
+                                time.sleep(2)
+
+                            mount.unmount(device)
             elif choice == "Update Tala":
                 time.sleep(1)
                 result = tala.yn("Are you sure you'd like to update")
-                if result:
+                if result is None:
+                    pass
+                elif result:
                     tala.message("Information", "Tala will update even if there's no new version. On the next screen select a way to update.")
                     choice = tala.menu(["Via Internet", "Via USB"])
                     if choice == "Via Internet":
@@ -376,7 +390,7 @@ while True:
                             time.sleep(2)
                             tala.menu(devices)
 
-                        if device != None:
+                        if device is not None:
                             logger.info("Using device " + device)
 
                             mount.mount(device)
@@ -395,7 +409,9 @@ while True:
                                 else:
                                     files.append("Exit")
                                     choice = tala.menu(files)
-                                    if choice != "Exit":
+                                    if choice is None:
+                                        pass
+                                    elif choice != "Exit":
                                         yn = tala.yn("Copy & Overwrite " + choice)
                                         if yn:
                                             logger.info("Copying file from " + os.path.join(mount.get_media_path(device), choice) + " to " + os.path.join(REPO_DIR, choice) + "...")
