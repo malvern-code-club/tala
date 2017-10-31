@@ -16,6 +16,9 @@ _FONT_LECO_PATH = "/opt/tala/leco1976.ttf"
 _FONT_FREEPIXEL_PATH = "/opt/tala/FreePixel.ttf"
 
 class Tala():
+
+    interrupt = False
+
     def __init__(self):
         # Setup Display
         self.display = Adafruit_SSD1306.SSD1306_128_64(rst=24)
@@ -113,6 +116,9 @@ class Tala():
             if GPIO.input(22):
                 key = "#"
 
+            if self.interrupt:
+                return None
+
             time.sleep(wait)
         return key
 
@@ -121,7 +127,7 @@ class Tala():
         message = ""
         key = ""
 
-        while doloop == True:
+        while doloop:
             self.keypad_row(1)
             if GPIO.input(17):
                 key = "1"
@@ -155,6 +161,10 @@ class Tala():
                 doloop = False
                 key = ""
             message = message + key
+
+            if self.interrupt:
+                return None
+
             time.sleep(wait)
         return message
 
@@ -173,15 +183,16 @@ class Tala():
         #   _ = Space
         #   <- = Backspace
         keypadkeys = {
-            "2": ["a", "b", "c"],
-            "3": ["d", "e", "f"],
-            "4": ["g", "h", "i"],
-            "5": ["j", "k", "l"],
-            "6": ["m", "n", "o"],
-            "7": ["p", "q", "r", "s"],
-            "8": ["t", "u", "v"],
-            "9": ["w", "x", "y", "z"],
-            "0": ["_"],
+            "1": ["1"],
+            "2": ["a", "b", "c", "2"],
+            "3": ["d", "e", "f", "3"],
+            "4": ["g", "h", "i", "4"],
+            "5": ["j", "k", "l", "5"],
+            "6": ["m", "n", "o", "6"],
+            "7": ["p", "q", "r", "s", "7"],
+            "8": ["t", "u", "v", "8"],
+            "9": ["w", "x", "y", "z", "9"],
+            "0": ["_", "0"],
             "*": ["<-", ".", ",", "!", "?"]
         }
 
@@ -196,7 +207,7 @@ class Tala():
 
             self.keypad_row(1)
             if GPIO.input(17):
-                key = ""
+                key = "1"
             if GPIO.input(27):
                 key = "2"
             if GPIO.input(22):
@@ -230,6 +241,9 @@ class Tala():
                 self.clear()
                 message = message + currentletter
                 doloop = False
+
+            if self.interrupt:
+                return None
 
             if key != "":
                 # If the key is the same as the key before (aka the button is
@@ -316,6 +330,8 @@ class Tala():
             # if # button is pressed return no
             elif btn == "*":
                 return False
+            elif btn is None:
+                return None
 
     def popup(self, title="", body=""):
         # make the message wrap (aka if it goes off the screen make it start on
@@ -410,6 +426,8 @@ class Tala():
             # if # button is pressed dismiss the message
             elif btn == "#":
                 return
+            elif btn is None:
+                return None
 
     def menu(self, items):
         if len(items) < 2:
@@ -455,6 +473,8 @@ class Tala():
                     selected = selected + 1
             elif btn == "#":
                 return items[selected]
+            elif btn is None:
+                return None
 
 
     def draw_rectangle(self, draw, x, y, h, o, f1, f2, selected, items, s, font):
