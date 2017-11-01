@@ -344,7 +344,7 @@ class Tala():
             elif btn is None:
                 return None
 
-    def popup(self, title="", body="", interrut_bypass=False):
+    def popup(self, title="", body="", interrupt_bypass=False):
         # make the message wrap (aka if it goes off the screen make it start on
         # a new line)
         wrapbody = textwrap.wrap(body, width=17)
