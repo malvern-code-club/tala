@@ -381,16 +381,14 @@ class Tala():
             draw.text((0+padding, 0+((padding+padding) if title != "" else 0)+titleheight+padding+((lineheight+2)*lines)), wrapbody[i], font=font, fill=255)
             lines += 1
 
-        if self.interrupt or not interrupt_bypass:
+        if self.interrupt and not interrupt_bypass:
+            print("Interrupting popup(). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
+            return None
             return None
         else:
             # draw the canvas to the screen
-            if self.interrupt and not interrupt_bypass:
-                print("Interrupting popup(). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
-                return None
-            else:
-                self.display.image(image)
-                self.display.display()
+            self.display.image(image)
+            self.display.display()
 
     def message(self, title, body, interrupt_bypass=False):
         # make the message wrap (aka if it goes off the screen make it start on
