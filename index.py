@@ -277,7 +277,7 @@ while True:
                         tala.message("Type Speed", "Failed to update type speed because the inputted value was not a number!")
 
                     if typespeedfloat is not None:
-                        c.execute("UPDATE `config` SET `value` = ? WHERE `option` = 'typespeed'". [typespeedfloat])
+                        c.execute("UPDATE `config` SET `value` = ? WHERE `option` = 'typespeed'", [typespeedfloat])
                         conn.commit()
                         tala.message("Type Speed", "Your type speed has been changed from " + str(typespeed) + " to " + newtypespeed + "!")
             elif choice == "Change Name":
