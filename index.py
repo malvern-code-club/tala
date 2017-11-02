@@ -17,7 +17,6 @@ import logging
 import logging.handlers
 import mount
 import shutil
-import dateutil.parser
 
 REPO_DIR = "/opt/tala/"
 STORAGE_DIR = "/opt/"
@@ -142,13 +141,8 @@ def recv_data():
                 if msg is not None:
                     tala.interrupt = True
 
-                    timestamp = msg["timestamp"]
-                    timestamp = dateutil.parser.parse(timestamp)
-                    timestamp = timestamp.strftime("%a %-d %b @ %-I:%M:%S")
-
-
                     tala.message("Message", "MESSAGE: " + msg["content"] +
-                                 " | SENT: " + timestamp +
+                                 " | SENT: " + msg["timestamp"] +
                                  " | FROM: " + msg["sender"]["name"],
                                  interrupt_bypass=True)
 
@@ -169,7 +163,8 @@ while True:
         if content is not None:
             msg_id = generateId()
 
-            timestamp = str(datetime.datetime.utcnow())
+            timestamp = datetime.datetime.utcnow()
+            timestamp = timestamp.strftime("%a %-d %b @ %-I:%M:%S")
 
             c.execute("SELECT `value` FROM `config` WHERE `option` = 'udid'")
             udid = c.fetchone()[0]
