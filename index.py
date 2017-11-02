@@ -105,7 +105,7 @@ c.execute("SELECT * FROM `config` WHERE `option` = 'udid'")
 if c.fetchone() is None:
     newUdid()
 
-c.execute("SELECT * FROM `config` WHERE `option` = 'typespeed'")
+c.execute("SELECT `value` FROM `config` WHERE `option` = 'typespeed'")
 if c.fetchone() is None:
     c.execute("INSERT INTO `config` (`option`, `value`) VALUES ('typespeed', '0.5')")
     conn.commit()
@@ -119,7 +119,7 @@ c.execute("SELECT * FROM `config` WHERE `option` = 'name'")
 if c.fetchone() is None:
     tala.message("First Run", "You don't have a name set! Why don't you introduce yourself? Press the checkmark button and then use the keys to type your name.")
     time.sleep(1)
-    c.execute("SELECT * FROM `config` WHERE `option` = 'typespeed'")
+    c.execute("SELECT `value` FROM `config` WHERE `option` = 'typespeed'")
     typespeed = c.fetchone()
     typespeed = (float(typespeed[0]) if typespeed is not None else 0.5)
     name = tala.type(wait=typespeed)
@@ -167,7 +167,7 @@ while True:
     time.sleep(1)
     if choice == "Public Message":
 
-        c.execute("SELECT * FROM `config` WHERE `option` = 'typespeed'")
+        c.execute("SELECT `value` FROM `config` WHERE `option` = 'typespeed'")
         typespeed = c.fetchone()
         typespeed = (float(typespeed[0]) if typespeed is not None else 0.5)
         content = tala.type(wait=typespeed)
@@ -215,7 +215,7 @@ while True:
         if choice == "New Memo":
             tala.popup(body="Input memo title")
             time.sleep(2)
-            c.execute("SELECT * FROM `config` WHERE `option` = 'typespeed'")
+            c.execute("SELECT `value` FROM `config` WHERE `option` = 'typespeed'")
             typespeed = c.fetchone()
             typespeed = (float(typespeed[0]) if typespeed is not None else 0.5)
             memo_name = tala.type(wait=typespeed)
@@ -259,14 +259,14 @@ while True:
                     time.sleep(1)
             elif choice == "Change Type Speed":
                 time.sleep(1)
-                c.execute("SELECT * FROM `config` WHERE `option` = 'typespeed'")
+                c.execute("SELECT `value` FROM `config` WHERE `option` = 'typespeed'")
                 typespeed = c.fetchone()
                 typespeed = (typespeed[0] if typespeed is not None else "0.5")
                 result = tala.yn("Type speed is " + typespeed + ". Change?")
                 if result:
                     tala.popup(body="Please insert new type speed (seconds)")
                     time.sleep(1.5)
-                    c.execute("SELECT * FROM `config` WHERE `option` = 'typespeed'")
+                    c.execute("SELECT `value` FROM `config` WHERE `option` = 'typespeed'")
                     typespeed = c.fetchone()
                     typespeed = (float(typespeed[0]) if typespeed is not None else 0.5)
                     newtypespeed = tala.type(wait=typespeed)
@@ -288,7 +288,7 @@ while True:
                 if result:
                     tala.popup(body="Please type new name")
                     time.sleep(1)
-                    c.execute("SELECT * FROM `config` WHERE `option` = 'typespeed'")
+                    c.execute("SELECT `value` FROM `config` WHERE `option` = 'typespeed'")
                     typespeed = c.fetchone()
                     typespeed = (float(typespeed[0]) if typespeed is not None else 0.5)
                     newname = tala.type(wait=typespeed)
