@@ -17,6 +17,7 @@ import logging
 import logging.handlers
 import mount
 import shutil
+import dateutil.parser
 
 REPO_DIR = "/opt/tala/"
 STORAGE_DIR = "/opt/"
@@ -140,10 +141,17 @@ def recv_data():
                 msg = decode(msg)
                 if msg is not None:
                     tala.interrupt = True
+
+                    timestamp = msg["timestamp"]
+                    timestamp = dateutil.parser.parse(timestamp)
+                    timestamp = timestamp.strftime("%a %-d %b @ %-I:%M:%S")
+
+
                     tala.message("Message", "MESSAGE: " + msg["content"] +
-                                 " | SENT: " + msg["timestamp"] +
+                                 " | SENT: " + timestamp +
                                  " | FROM: " + msg["sender"]["name"],
                                  interrupt_bypass=True)
+
                     tala.interrupt = False
 
 
