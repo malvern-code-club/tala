@@ -123,7 +123,7 @@ class Tala():
             time.sleep(wait)
         return key
 
-    def type_numbers(self, wait=0.5, interrupt_bypass=False):
+    def type_numbers(self, wait=0.05, interrupt_bypass=False):
         doloop = True
         message = ""
         key = ""
