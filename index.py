@@ -262,7 +262,7 @@ while True:
                 c.execute("SELECT `value` FROM `config` WHERE `option` = 'typespeed'")
                 typespeed = c.fetchone()
                 typespeed = (typespeed[0] if typespeed is not None else "0.5")
-                result = tala.yn("Type speed is " + typespeed + ". Change?")
+                result = tala.yn("Type speed is " + typespeed + ". Change")
                 if result:
                     tala.popup(body="Please insert new type speed (seconds)")
                     time.sleep(1.5)
@@ -277,7 +277,7 @@ while True:
                         tala.message("Type Speed", "Failed to update type speed because the inputted value was not a number!")
 
                     if typespeedfloat is not None:
-                        c.execute("UPDATE `config` SET `value` = ? WHERE `option` = 'typespeed'")
+                        c.execute("UPDATE `config` SET `value` = ? WHERE `option` = 'typespeed'". [typespeedfloat])
                         conn.commit()
                         tala.message("Type Speed", "Your type speed has been changed from " + str(typespeed) + " to " + newtypespeed + "!")
             elif choice == "Change Name":
