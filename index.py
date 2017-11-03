@@ -171,33 +171,35 @@ while True:
         typespeed = c.fetchone()
         typespeed = (float(typespeed[0]) if typespeed is not None else 0.5)
         content = tala.type(wait=typespeed)
+        if content != "":
+            if content is not None:
+                msg_id = generateId()
 
-        if content is not None:
-            msg_id = generateId()
+                timestamp = datetime.datetime.utcnow()
+                timestamp = timestamp.strftime("%a %-d %b @ %-I:%M:%S")
 
-            timestamp = datetime.datetime.utcnow()
-            timestamp = timestamp.strftime("%a %-d %b @ %-I:%M:%S")
+                c.execute("SELECT `value` FROM `config` WHERE `option` = 'udid'")
+                udid = c.fetchone()[0]
 
-            c.execute("SELECT `value` FROM `config` WHERE `option` = 'udid'")
-            udid = c.fetchone()[0]
+                c.execute("SELECT `value` FROM `config` WHERE `option` = 'name'")
+                name = c.fetchone()[0]
 
-            c.execute("SELECT `value` FROM `config` WHERE `option` = 'name'")
-            name = c.fetchone()[0]
-
-            message = {
-                "content": content,
-                "id": msg_id,
-                "timestamp": timestamp,
-                "sender": {
-                    "name": name,
-                    "udid": udid
+                message = {
+                    "content": content,
+                    "id": msg_id,
+                    "timestamp": timestamp,
+                    "sender": {
+                        "name": name,
+                        "udid": udid
+                    }
                 }
-            }
 
-            logger.info("Sending Public Message: " + encode(message))
+                logger.info("Sending Public Message: " + encode(message))
 
-            tala.send(encode(message))
-            time.sleep(1)
+                tala.send(encode(message))
+                time.sleep(1)
+        else:
+            tala.message("Error", "Please enter a message")
     elif choice == "Memo":
         c.execute("SELECT * FROM memos")
         memos = c.fetchall()
