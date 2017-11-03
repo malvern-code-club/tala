@@ -107,7 +107,7 @@ def decode(data):
     data = json.loads(data) #Load from json
     return(data)
 
-def restart():
+def restart_tala():
      tala.popup("Updated", "Update was successful! Tala will now restart in 3 seconds...")
      time.sleep(3)
      tala.clear()
@@ -223,16 +223,21 @@ while True:
             logger.info("Created new memo with title '" + memo_name + "' and body '" + memo_data + "'")
             c.execute("INSERT INTO memos (memo_name, memo_data) values (?, ?)", [memo_name, memo_data])
             conn.commit()
+        """ 
         elif choice == "Delete Memo":
-            choice = tala.menu(memos)
-            time.sleep(0.5)
-            if choice == "empty":
-                pass
-            elif choice is None:
-                pass
-            else:
+            if len(memos) < 2:
                 c.execute("DELETE FROM memos WHERE memo_name = ?", [choice])
-                conn.commit()
+            else:
+                choice = tala.menu(memos)
+                time.sleep(0.5)
+                if choice == "empty":
+                    pass
+                elif choice is None:
+                    pass
+                else:
+                    c.execute("DELETE FROM memos WHERE memo_name = ?", [choice])
+                    conn.commit()
+        """
         else:
             c.execute("SELECT memo_data FROM memos WHERE memo_name = ?", [choice])
             memo_data = c.fetchone()
@@ -401,7 +406,7 @@ while True:
                                 subprocess.call(["cp", REPO_DIR + "tala.sh", "/etc/init.d"])
                                 subprocess.call(["chmod", "755", "/etc/init.d/tala.sh"])
 
-                                restart()
+                                restart_tala()
                                 break
                             else:
                                 logger.info("`updatetest` file doesn't exist. Update unsuccessful.")
@@ -460,7 +465,7 @@ while True:
                                             time.sleep(0.5)
                                             restart = tala.yn("Restart")
                                             if restart:
-                                                restart()
+                                                restart_tala()
                             else:
                                 logger.info("Problem mounting drive " + device)
                                 tala.message("Failure", "Problem mounting " + device + "!")
