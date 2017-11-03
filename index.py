@@ -105,6 +105,7 @@ def restart():
      tala.popup("Updated", "Update was successful! Tala will now restart in 3 seconds...")
      time.sleep(3)
      tala.clear()
+     subprocess.call(["/etc/init.d/tala.sh", "restart"])
 
 c.execute("SELECT * FROM `config` WHERE `option` = 'udid'")
 if c.fetchone() == None:
