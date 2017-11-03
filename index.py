@@ -10,7 +10,6 @@ import json
 import time
 import subprocess
 import os
-import datetime
 import urllib.request
 import urllib.error
 import sys
@@ -24,17 +23,19 @@ STORAGE_DIR = "/opt/"
 
 os.chdir(REPO_DIR)
 
-LOG_FILENAME = STORAGE_DIR + "tala.log"
+LOG_NAME = "tala.log"
+LOG_FILENAME = STORAGE_DIR + LOG_NAME
 LOG_LEVEL = logging.INFO
 
 DB_FILENAME = STORAGE_DIR + "tala.db"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(LOG_LEVEL)
-handler = logging.handlers.TimedRotatingFileHandler(LOG_FILENAME, when="midnight", backupCount=2)
+handler = logging.FileHandler(LOG_FILENAME)
 formatter = logging.Formatter("%(asctime)s %(levelname)-8s %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
+
 
 class TalaLogger(object):
     def __init__(self, logger, level):
@@ -45,6 +46,7 @@ class TalaLogger(object):
         if message.rstrip() != "":
             self.logger.log(self.level, message.rstrip())
 
+
 sys.stdout = TalaLogger(logger, logging.INFO)
 sys.stderr = TalaLogger(logger, logging.ERROR)
 
@@ -52,6 +54,7 @@ conn = None
 c = None
 
 logger.info("=== STARTED TALA ===")
+
 
 def setupDb():
     global conn
@@ -82,10 +85,13 @@ def setupDb():
                       table["name"] + " (" + table["columns"] + ")")
             conn.commit()
 
+
 setupDb()
+
 
 def generateId():
     return "".join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6))
+
 
 def newUdid():
     udid = generateId()
@@ -108,30 +114,46 @@ def restart():
      subprocess.call(["/etc/init.d/tala.sh", "restart"])
 
 c.execute("SELECT * FROM `config` WHERE `option` = 'udid'")
-if c.fetchone() == None:
+if c.fetchone() is None:
     newUdid()
+
+c.execute("SELECT `value` FROM `config` WHERE `option` = 'typespeed'")
+if c.fetchone() is None:
+    c.execute("INSERT INTO `config` (`option`, `value`) VALUES ('typespeed', '0.5')")
+    conn.commit()
+    logger.info("Set type speed as 0.5 as it hasn't been set.")
 
 tala = talalib.Tala()
 
 tala.clear()
 
 c.execute("SELECT * FROM `config` WHERE `option` = 'name'")
-if c.fetchone() == None:
+if c.fetchone() is None:
     tala.message("First Run", "You don't have a name set! Why don't you introduce yourself? Press the checkmark button and then use the keys to type your name.")
     time.sleep(0.5)
-    name = tala.type()
-    c.execute("INSERT INTO `config` (`option`, `value`) VALUES ('name', ?)", [name])
-    conn.commit()
-
+    c.execute("SELECT `value` FROM `config` WHERE `option` = 'typespeed'")
+    typespeed = c.fetchone()
+    typespeed = (float(typespeed[0]) if typespeed is not None else 0.5)
+    name = tala.type(wait=typespeed)
+    if name is not None:
+        c.execute("INSERT INTO `config` (`option`, `value`) VALUES ('name', ?)", [name])
+        conn.commit()
 
 def recv_data():
         while True:
-            data = tala.receive()
-            time.sleep(0.5)
-            if data == "":
-                pass
-            else:
-                tala.message("Message", data)
+            msg = tala.receive()
+            if not msg == "":
+                msg = decode(msg)
+                if msg is not None:
+                    tala.interrupt = True
+
+                    tala.message("Message", "MESSAGE: " + msg["content"] +
+                                 " | SENT: " + msg["timestamp"] +
+                                 " | FROM: " + msg["sender"]["name"],
+                                 interrupt_bypass=True)
+
+                    tala.interrupt = False
+
 
 thread_recv_data = threading.Thread(target=recv_data)
 thread_recv_data.start()
@@ -141,32 +163,37 @@ while True:
     choice = tala.menu(["Public Message", "Memo", "Settings", "Power Off"])
     time.sleep(0.5)
     if choice == "Public Message":
-        content = tala.type()
+        c.execute("SELECT `value` FROM `config` WHERE `option` = 'typespeed'")
+        typespeed = c.fetchone()
+        typespeed = (float(typespeed[0]) if typespeed is not None else 0.5)
+        content = tala.type(wait=typespeed)
 
-        msg_id = generateId()
+        if content is not None:
+            msg_id = generateId()
 
-        timestamp = str(datetime.datetime.utcnow())
+            timestamp = datetime.datetime.utcnow()
+            timestamp = timestamp.strftime("%a %-d %b @ %-I:%M:%S")
 
-        c.execute("SELECT `value` FROM `config` WHERE `option` = 'udid'")
-        udid = c.fetchone()[0]
+            c.execute("SELECT `value` FROM `config` WHERE `option` = 'udid'")
+            udid = c.fetchone()[0]
 
-        c.execute("SELECT `value` FROM `config` WHERE `option` = 'name'")
-        name = c.fetchone()[0]
+            c.execute("SELECT `value` FROM `config` WHERE `option` = 'name'")
+            name = c.fetchone()[0]
 
-        message = {
-                    "content": content,
-                    "id": msg_id,
-                    "timestamp": timestamp,
-                    "sender": {
-                        "name": name,
-                        "udid": udid
-                    }
+            message = {
+                "content": content,
+                "id": msg_id,
+                "timestamp": timestamp,
+                "sender": {
+                    "name": name,
+                    "udid": udid
                 }
+            }
 
-        logger.info("Sending Public Message: " + encode(message))
-
-        tala.send(encode(message))
-        time.sleep(0.5)
+            logger.info("Sending Public Message: " + encode(message))
+            
+            tala.send(encode(message))
+            time.sleep(0.5)
     elif choice == "Memo":
         c.execute("SELECT * FROM memos")
         memos = c.fetchall()
@@ -180,15 +207,19 @@ while True:
         else:
             logger.info("No memos created, automatically choosing to create new memo.")
             choice = "New Memo"
+
         if choice == "New Memo":
             tala.popup(body="Input memo title")
             time.sleep(2)
-            memo_name = tala.type()
-            time.sleep(0.5)
+            c.execute("SELECT `value` FROM `config` WHERE `option` = 'typespeed'")
+            typespeed = c.fetchone()
+            typespeed = (float(typespeed[0]) if typespeed is not None else 0.5)
+            memo_name = tala.type(wait=typespeed)
+            time.sleep(1)
             tala.popup(body="Input memo text")
             time.sleep(2)
-            memo_data = tala.type()
-            time.sleep(0.5)
+            memo_data = tala.type(wait=typespeed)
+            time.sleep(1)
             logger.info("Created new memo with title '" + memo_name + "' and body '" + memo_data + "'")
             c.execute("INSERT INTO memos (memo_name, memo_data) values (?, ?)", [memo_name, memo_data])
             conn.commit()
@@ -196,6 +227,8 @@ while True:
             choice = tala.menu(memos)
             time.sleep(0.5)
             if choice == "empty":
+                pass
+            elif choice is None:
                 pass
             else:
                 c.execute("DELETE FROM memos WHERE memo_name = ?", [choice])
@@ -207,17 +240,42 @@ while True:
             time.sleep(0.5)
     elif choice == "Settings":
         while True:
-            choice = tala.menu(["Change Name", "Reset Device ID", "Clear Data", "Update Tala", "Exit Options"])
+            choice = tala.menu(["Change Name", "Change Type Speed", "Reset Device ID", "Clear Data", "Update Tala", "Save Log to USB", "Exit Options"])
             if choice == "Reset Device ID":
                 time.sleep(0.5)
                 result = tala.yn("Are you sure")
                 if result:
                     newUdid()
                     tala.message("Reset UDID", "Device ID regenerated!")
-                    time.sleep(0.5)
+                    time.sleep(1)
+                elif result is None:
+                    pass
                 elif not result:
                     tala.message("Reset UDID", "No changes made.")
-                    time.sleep(0.5)
+                    time.sleep(1)
+            elif choice == "Change Type Speed":
+                time.sleep(1)
+                c.execute("SELECT `value` FROM `config` WHERE `option` = 'typespeed'")
+                typespeed = c.fetchone()
+                typespeed = (typespeed[0] if typespeed is not None else "0.5")
+                result = tala.yn("Type speed is " + typespeed + ". Change")
+                if result:
+                    tala.popup(body="Please insert new type speed (seconds)")
+                    time.sleep(1.5)
+                    c.execute("SELECT `value` FROM `config` WHERE `option` = 'typespeed'")
+                    typespeed = c.fetchone()
+                    typespeed = (float(typespeed[0]) if typespeed is not None else 0.5)
+                    newtypespeed = tala.type(wait=typespeed)
+                    typespeedfloat = None
+                    try:
+                        typespeedfloat = float(newtypespeed)
+                    except ValueError:
+                        tala.message("Type Speed", "Failed to update type speed because the inputted value was not a number!")
+
+                    if typespeedfloat is not None:
+                        c.execute("UPDATE `config` SET `value` = ? WHERE `option` = 'typespeed'", [typespeedfloat])
+                        conn.commit()
+                        tala.message("Type Speed", "Your type speed has been changed from " + str(typespeed) + " to " + newtypespeed + "!")
             elif choice == "Change Name":
                 time.sleep(0.5)
                 c.execute("SELECT `value` FROM `config` WHERE `option` = 'name'")
@@ -225,32 +283,84 @@ while True:
                 result = tala.yn("Current name is " + name + ". Change")
                 if result:
                     tala.popup(body="Please type new name")
-                    time.sleep(0.5)
-                    newname = tala.type()
-                    c.execute("UPDATE `config` SET `value` = ? WHERE `option` = 'name'", [newname])
-                    conn.commit()
-                    tala.message("Changed", "Your name has been changed from " + name + " to " + newname + "!")
+                    time.sleep(1)
+                    c.execute("SELECT `value` FROM `config` WHERE `option` = 'typespeed'")
+                    typespeed = c.fetchone()
+                    typespeed = (float(typespeed[0]) if typespeed is not None else 0.5)
+                    newname = tala.type(wait=typespeed)
+                    if newname is not None:
+                        c.execute("UPDATE `config` SET `value` = ? WHERE `option` = 'name'", [newname])
+                        conn.commit()
+                        tala.message("Changed", "Your name has been changed from " + name + " to " + newname + "!")
             elif choice == "Clear Data":
                 time.sleep(0.5)
                 result = tala.yn("Are you sure")
-                if result:
-                    logger.info("Deleting database...")
-                    os.remove(DB_FILENAME)
-                    tala.popup("Purging...", "Database purged!")
-                    time.sleep(2)
-                    tala.popup("Purging...", "Recreating Database...")
-                    logger.info("Setting up database...")
-                    setupDb()
-                    tala.message("Purged", "Successfully cleared data.")
-                    time.sleep(0.5)
-                    logger.info("Database purge complete!")
-                elif not result:
-                    tala.message("Alert", "No changed made.")
-                    time.sleep(0.5)
+                if result is not None:
+                    if result:
+                        logger.info("Deleting database...")
+                        os.remove(DB_FILENAME)
+                        tala.popup("Purging...", "Database purged!")
+                        time.sleep(2)
+                        tala.popup("Purging...", "Recreating Database...")
+                        logger.info("Setting up database...")
+                        setupDb()
+                        tala.message("Purged", "Successfully cleared data.")
+                        time.sleep(1)
+                        logger.info("Database purge complete!")
+                    elif not result:
+                        tala.message("Alert", "No changed made.")
+                        time.sleep(1)
+            elif choice == "Save Log to USB":
+                time.sleep(1)
+                result = tala.yn("Save log to usb")
+                if result is not None:
+                    if result:
+                        tala.message("Update", "Please PLUG IN your USB drive to save log to then press the checkmark to continue.")
+
+                        devices = mount.list_media_devices()
+
+                        logger.info(str(len(devices)) + " device(s) found.")
+
+                        device = None
+
+                        if len(devices) <= 0:
+                            tala.message("Failure", "Couldn't detect any USB drives.")
+                        elif len(devices) == 1:
+                            tala.popup("Update", "Only 1 drive found, using that one.")
+                            time.sleep(2)
+                            device = devices[0]
+                        else:
+                            tala.popup(body="Select a drive to save to")
+                            time.sleep(2)
+                            tala.menu(devices)
+
+                        if device is not None:
+                            logger.info("Using device " + device)
+
+                            mount.mount(device)
+
+                            if mount.is_mounted(device):
+                                files = []
+
+                                for filename in os.listdir(mount.get_media_path(device)):
+                                    path = os.path.join(mount.get_media_path(device), filename)
+                                    if os.path.isfile(path):
+                                        files.append(filename)
+
+                                tala.popup("Copying...", "Copying log file...")
+                                logger.info("Copying file from " + LOG_FILENAME + " to " + os.path.join(mount.get_media_path(device), LOG_NAME) + "...")
+                                shutil.copy(LOG_FILENAME, os.path.join(mount.get_media_path(device), LOG_NAME))
+                                logger.info("Copy complete!")
+                                tala.popup("Copyied", "Copy complete!")
+                                time.sleep(2)
+
+                            mount.unmount(device)
             elif choice == "Update Tala":
                 time.sleep(0.5)
                 result = tala.yn("Are you sure you'd like to update")
-                if result:
+                if result is None:
+                    pass
+                elif result:
                     tala.message("Information", "Tala will update even if there's no new version. On the next screen select a way to update.")
                     choice = tala.menu(["Via Internet", "Via USB"])
                     if choice == "Via Internet":
@@ -319,7 +429,7 @@ while True:
                             time.sleep(2)
                             tala.menu(devices)
 
-                        if device != None:
+                        if device is not None:
                             logger.info("Using device " + device)
 
                             mount.mount(device)
@@ -338,7 +448,9 @@ while True:
                                 else:
                                     files.append("Exit")
                                     choice = tala.menu(files)
-                                    if choice != "Exit":
+                                    if choice is None:
+                                        pass
+                                    elif choice != "Exit":
                                         yn = tala.yn("Copy & Overwrite " + choice)
                                         if yn:
                                             logger.info("Copying file from " + os.path.join(mount.get_media_path(device), choice) + " to " + os.path.join(REPO_DIR, choice) + "...")
