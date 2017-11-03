@@ -16,6 +16,9 @@ _FONT_LECO_PATH = "/opt/tala/leco1976.ttf"
 _FONT_FREEPIXEL_PATH = "/opt/tala/FreePixel.ttf"
 
 class Tala():
+
+    interrupt = False
+
     def __init__(self):
         # Setup Display
         self.display = Adafruit_SSD1306.SSD1306_128_64(rst=24)
@@ -73,7 +76,7 @@ class Tala():
             GPIO.output(13, GPIO.LOW)
             GPIO.output(6, GPIO.HIGH)
 
-    def singlebutton(self, wait=0.05):
+    def singlebutton(self, wait=0.05, interrupt_bypass=False):
         key = ""
 
         # Loop while we haven't got a key
@@ -113,15 +116,19 @@ class Tala():
             if GPIO.input(22):
                 key = "#"
 
+            if self.interrupt and not interrupt_bypass:
+                print("Interrupting singlebutton(). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
+                return None
+
             time.sleep(wait)
         return key
 
-    def type_numbers(self, wait=0.5):
+    def type_numbers(self, wait=0.05, interrupt_bypass=False):
         doloop = True
         message = ""
         key = ""
 
-        while doloop == True:
+        while doloop:
             self.keypad_row(1)
             if GPIO.input(17):
                 key = "1"
@@ -155,10 +162,15 @@ class Tala():
                 doloop = False
                 key = ""
             message = message + key
+
+            if self.interrupt and not interrupt_bypass:
+                print("Interrupting type_numbers(). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
+                return None
+
             time.sleep(wait)
         return message
 
-    def type(self, wait=0.5):
+    def type(self, wait=0.5, interrupt_bypass=False):
         # Make a new image/canvas with the width and height of the screen.
         image = Image.new("1", (self.width, self.height))
         # Make a new draw variable which draws shapes/text to the screen.
@@ -173,15 +185,16 @@ class Tala():
         #   _ = Space
         #   <- = Backspace
         keypadkeys = {
-            "2": ["a", "b", "c"],
-            "3": ["d", "e", "f"],
-            "4": ["g", "h", "i"],
-            "5": ["j", "k", "l"],
-            "6": ["m", "n", "o"],
-            "7": ["p", "q", "r", "s"],
-            "8": ["t", "u", "v"],
-            "9": ["w", "x", "y", "z"],
-            "0": ["_"],
+            "1": ["1"],
+            "2": ["a", "b", "c", "2"],
+            "3": ["d", "e", "f", "3"],
+            "4": ["g", "h", "i", "4"],
+            "5": ["j", "k", "l", "5"],
+            "6": ["m", "n", "o", "6"],
+            "7": ["p", "q", "r", "s", "7"],
+            "8": ["t", "u", "v", "8"],
+            "9": ["w", "x", "y", "z", "9"],
+            "0": ["_", "0"],
             "*": ["<-", ".", ",", "!", "?"]
         }
 
@@ -196,7 +209,7 @@ class Tala():
 
             self.keypad_row(1)
             if GPIO.input(17):
-                key = ""
+                key = "1"
             if GPIO.input(27):
                 key = "2"
             if GPIO.input(22):
@@ -231,6 +244,10 @@ class Tala():
                 message = message + currentletter
                 doloop = False
 
+            if self.interrupt and not interrupt_bypass:
+                print("Interrupting type(). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
+                return None
+
             if key != "":
                 # If the key is the same as the key before (aka the button is
                 # being held down.)
@@ -258,8 +275,12 @@ class Tala():
                 draw.text(((self.width-w)/2, (self.height-h)/2), currentletter, font=bigfont, fill=255)
 
                 # Display the canvas on the screen.
-                self.display.image(image)
-                self.display.display()
+                if self.interrupt and not interrupt_bypass:
+                    print("Interrupting type() (SCREEN DRAW). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
+                    return None
+                else:
+                    self.display.image(image)
+                    self.display.display()
 
                 keybefore = key
                 time.sleep(wait)
@@ -292,8 +313,12 @@ class Tala():
                     lines += 1
 
                 # display the canvas to the screen
-                self.display.image(image)
-                self.display.display()
+                if self.interrupt and not interrupt_bypass:
+                    print("Interrupting type() (SCREEN DRAW). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
+                    return None
+                else:
+                    self.display.image(image)
+                    self.display.display()
 
                 keybefore = ""
                 time.sleep(0.1)
@@ -304,20 +329,22 @@ class Tala():
         # ie turn off pins, etc..
         GPIO.cleanup()
 
-    def yn(self, question):
+    def yn(self, question, interrupt_bypass=False):
         self.popup(body=question + "?")
 
         while True:
             # check for button presses
-            btn = self.singlebutton()
+            btn = self.singlebutton(interrupt_bypass=interrupt_bypass)
             # if button * is pressed return yes
             if btn == "#":
                 return True
             # if # button is pressed return no
             elif btn == "*":
                 return False
+            elif btn is None:
+                return None
 
-    def popup(self, title="", body=""):
+    def popup(self, title="", body="", interrupt_bypass=False):
         # make the message wrap (aka if it goes off the screen make it start on
         # a new line)
         wrapbody = textwrap.wrap(body, width=17)
@@ -354,11 +381,16 @@ class Tala():
             draw.text((0+padding, 0+((padding+padding) if title != "" else 0)+titleheight+padding+((lineheight+2)*lines)), wrapbody[i], font=font, fill=255)
             lines += 1
 
-        # draw the canvas to the screen
-        self.display.image(image)
-        self.display.display()
+        if self.interrupt and not interrupt_bypass:
+            print("Interrupting popup(). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
+            return None
+            return None
+        else:
+            # draw the canvas to the screen
+            self.display.image(image)
+            self.display.display()
 
-    def message(self, title, body):
+    def message(self, title, body, interrupt_bypass=False):
         # make the message wrap (aka if it goes off the screen make it start on
         # a new line)
         wrapbody = textwrap.wrap(body, width=17)
@@ -393,25 +425,31 @@ class Tala():
                 draw.text((0+padding, 0+padding+titleheight+padding+padding+((lineheight+2)*lines)), wrapbody[i], font=font, fill=255)
                 lines += 1
 
-            # draw the canvas to the screen
-            self.display.image(image)
-            self.display.display()
+            if self.interrupt and not interrupt_bypass:
+                print("Interrupting message() (SCREEN DRAW). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
+                return None
+            else:
+                # draw the canvas to the screen
+                self.display.image(image)
+                self.display.display()
 
             # check for button presses
-            btn = self.singlebutton()
+            btn = self.singlebutton(interrupt_bypass=interrupt_bypass)
             # if button 2 is pressed scroll up
             if btn == "2":
                 if startline > 0:
                     startline = startline - 1
             # if button 8 is pressed scroll down
             elif btn == "8":
-                if startline < (len(wrapbody)-1):
+                if startline < (len(wrapbody) - 1):
                     startline = startline + 1
             # if # button is pressed dismiss the message
             elif btn == "#":
                 return
+            elif btn is None:
+                return None
 
-    def menu(self, items):
+    def menu(self, items, interrupt_bypass=False):
         if len(items) < 2:
             raise ValueError("Items list given must contain 2 or more items!")
 
@@ -443,10 +481,14 @@ class Tala():
                 self.draw_rectangle(draw, 0, 16, 48, 255, 255, 0, selected, items, 0, font)
                 self.draw_rectangle(draw, 0, 48, 80, 0, 0, 255, selected, items, 1, font)
 
-            self.display.image(image)
-            self.display.display()
+            if self.interrupt and not interrupt_bypass:
+                print("Interrupting menu() (SCREEN DRAW). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
+                return None
+            else:
+                self.display.image(image)
+                self.display.display()
 
-            btn = self.singlebutton()
+            btn = self.singlebutton(interrupt_bypass=interrupt_bypass)
             if btn == "2":
                 if selected > 0:
                     selected = selected - 1
@@ -455,6 +497,8 @@ class Tala():
                     selected = selected + 1
             elif btn == "#":
                 return items[selected]
+            elif btn is None:
+                return None
 
 
     def draw_rectangle(self, draw, x, y, h, o, f1, f2, selected, items, s, font):
@@ -463,9 +507,13 @@ class Tala():
         padding = (32-th)/2
         draw.text((x+padding, y+padding), items[selected+s], font=font, fill=f2)
 
-    def clear(self):
-        self.display.clear()
-        self.display.display()
+    def clear(self, interrupt_bypass=False):
+        if self.interrupt and not interrupt_bypass:
+            print("Interrupting clear() (SCREEN DRAW). Interrupt is " + str(self.interrupt) + ", Bypass is " + str(interrupt_bypass))
+            return None
+        else:
+            self.display.clear()
+            self.display.display()
 
     def send(self, message):
         message = message.encode()
