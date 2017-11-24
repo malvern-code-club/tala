@@ -2,7 +2,7 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8d164705b0754d2aa521074af36ce943)](https://www.codacy.com/app/malvern-code-club/tala?utm_source=github.com&utm_medium=referral&utm_content=malvern-code-club/tala&utm_campaign=badger)
 
-A text only portable communication device designed for an apocolypse.
+A text only portable communication device designed for an apocolypse. This project was a competition entry for [Raspberry Pi Pioneers](https://www.raspberrypi.org/pioneers/).
 
 ## talalib.py
 
