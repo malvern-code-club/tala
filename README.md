@@ -4,6 +4,10 @@
 
 A text only portable communication device designed for an apocolypse. This project was a competition entry for [Raspberry Pi Pioneers](https://www.raspberrypi.org/pioneers/).
 
+> Our project ended up winning **'Best Explaination'**. Check out the [announcement blog post](https://www.raspberrypi.org/blog/pioneers-winners-only-you-can-save-us/) ([archive.org](https://web.archive.org/web/20180103014359/https://www.raspberrypi.org/blog/pioneers-winners-only-you-can-save-us/)) for the other winning projects.
+
+> The repository as of when the competition was taking place can be seen on the [`final` tag](https://github.com/malvern-code-club/tala/tree/final).
+
 ## talalib.py
 
 talalib.py is a Python module to interact with *most* of the sensors in the Tala
